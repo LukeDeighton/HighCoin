@@ -25,8 +25,8 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
   def addTransaction(transaction: Transaction): Blockchain =
     this.copy(unboundTransactions :+ transaction)
 
-  def calculateProofOfWork(newBlock: Block): Block = {
-    var block = newBlock
+  def calculateProofOfWork(unprovedBlock: Block): Block = {
+    var block = unprovedBlock
     var nonce = 0
     while (!isValidProof(block)) {
       nonce += 1
