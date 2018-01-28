@@ -16,7 +16,7 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     chain = Seq.empty)
 
   def generateWallet = Action {
-    Ok(asJson(Wallet()))
+    Ok(asJson(Wallet.create()))
   }
 
   def newTransaction = Action { implicit request: Request[AnyContent] =>

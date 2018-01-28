@@ -20,7 +20,7 @@ case class Wallet(signingKey: Option[String], address: String) {
     blockchain.chain
       .flatMap(_.transactions)
       .filter {
-        case Tx.CoinCreation(_, address) => address == this.address
+        case Tx.CoinCreation(_, addr) => addr == address
         case Tx.CoinTransfer(_, outputs) => outputs.exists(_.address == this.address)
       }
   }
