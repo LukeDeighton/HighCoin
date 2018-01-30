@@ -1,6 +1,7 @@
 package models
 
 import cryptocurrency.{Blockchain, TransactionOps}
+import models.{Transaction => Tx}
 import org.bitcoinj.core.{Base58, ECKey}
 
 object Wallet {
@@ -17,6 +18,11 @@ object Wallet {
 
 case class Wallet(signingKey: Option[String], address: String) {
 
-  def getUnspentTransactions(blockchain: Blockchain) =
-    new TransactionOps(blockchain).getTransactions(address)
+  def getSpendableTransaction()
+
+  def getTransactionOutputs(implicit blockchain: Blockchain): Seq[Tx.Output] =
+    TransactionOps.getTransactionOutputs(address)
+
+  def getBalance(implicit blockchain: Blockchain): BigDecimal =
+    getTransactionOutputs.map(_.value).sum
 }

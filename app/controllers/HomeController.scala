@@ -11,7 +11,7 @@ import utils.JsonWriteables._
 @Singleton
 class HomeController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  var blockchain: Blockchain = Blockchain(
+  implicit var blockchain: Blockchain = Blockchain(
     unboundTransactions = Seq.empty,
     chain = Seq.empty)
 
@@ -24,26 +24,25 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     val txRequest = as[TransactionRequest](jsonBodyStr)
 
     val wallet = Wallet.create(txRequest.senderAddress)
-    val transactions = wallet.getUnspentTransactions(blockchain)
-    transactions.headOption match {
-      case Some(transaction: Transaction) =>
-        val transferTx = Transaction(
-          inputs = Seq(
-            Transaction.Input(
-              txRequest.senderSignature,
-              outputRef = Transaction.OutputRef(transaction.hash().toHex, 0)
-            )),
-          outputs = Seq(
-            Transaction.Output(txRequest.value, txRequest.recipientAddress)
-          )
-        )
-
-        blockchain = blockchain.addTransaction(transferTx)
-
-        Ok("Transaction will be added to block index: " + blockchain.nextBlockIndex)
-      case None =>
-        UnprocessableEntity("Insufficient funds")
+    if (txRequest.value > wallet.getBalance) {
+      return UnprocessableEntity("Insufficient funds")
     }
+
+    wallet.getTransactionOutputs
+    val transferTx = Transaction(
+      inputs = Seq(
+        Transaction.Input(
+          txRequest.senderSignature,
+          outputRef = Transaction.OutputRef(transaction.hash().toHex, 0)
+        )),
+      outputs = Seq(
+        Transaction.Output(txRequest.value, txRequest.recipientAddress)
+      )
+    )
+
+    blockchain = blockchain.addTransaction(transferTx)
+
+    Ok("Transaction will be added to block index: " + blockchain.nextBlockIndex)
   }
 
   def mine(address: String) = Action {

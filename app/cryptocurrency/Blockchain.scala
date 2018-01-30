@@ -1,6 +1,6 @@
 package cryptocurrency
 
-import models.{Block, Transaction}
+import models.{Block, Transaction, Transaction => Tx}
 
 case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) {
 
@@ -24,4 +24,10 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
 
   def addTransaction(transaction: Transaction): Blockchain =
     this.copy(unboundTransactions :+ transaction)
+
+  val allTransactions: Seq[Transaction] = chain.flatMap(_.transactions)
+
+  val allTxOutputs: Seq[Tx.Output] = allTransactions.flatMap(_.outputs)
+
+  val allTxInputs: Seq[Tx.Input] = allTransactions.flatMap(_.inputs)
 }
