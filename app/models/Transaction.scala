@@ -1,43 +1,36 @@
 package models
 
-sealed trait Transaction {
+import models.Transaction.{Input, Output}
 
-  def serialise: String
+case class Transaction(inputs: Seq[Input],
+                       outputs: Seq[Output]) {
 
-  def hash(): Hash256
+  def serialise: String = {
+    val inputHashStr = inputs.size + inputs.foldLeft("")(_ + _.serialise)
+    val outputHashStr = outputs.size + outputs.foldLeft("")(_ + _.serialise)
+    inputHashStr + outputHashStr
+  }
+
+  def hash(): Hash256 = Sha256.digest(serialise)
 }
 
 object Transaction {
 
-  case class CoinCreation(value: BigDecimal, address: String) extends Transaction {
-
-    def serialise: String = value + address
-
-    def hash(): Hash256 = Sha256.digest(serialise)
-  }
-
-  case class CoinTransfer(inputs: Seq[Input],
-                          outputs: Seq[Output]) extends Transaction {
-
-    def serialise: String = {
-      val inputHashStr = inputs.size + inputs.foldLeft("")(_ + _.serialise)
-      val outputHashStr = outputs.size + outputs.foldLeft("")(_ + _.serialise)
-      inputHashStr + outputHashStr
-    }
-
-    def hash(): Hash256 = Sha256.digest(serialise)
-  }
+  def createCoin(value: BigDecimal, address: String): Transaction =
+    Transaction(
+      inputs = Seq.empty,
+      outputs = Seq(Output(value, address)))
 
   case class Input(signature: String,
-                   previousOutput: OutputRef) {
+                   outputRef: OutputRef) {
 
-    def serialise: String = signature + previousOutput.serialise
+    def serialise: String = signature + outputRef.serialise
   }
 
-  case class OutputRef(prevTxHash: Hash256,
+  case class OutputRef(transactionHash: String,
                        outputIndex: Int) {
 
-    def serialise: String = prevTxHash.toHex + outputIndex
+    def serialise: String = transactionHash + outputIndex
   }
 
   case class Output(value: BigDecimal,

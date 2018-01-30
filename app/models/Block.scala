@@ -2,8 +2,6 @@ package models
 
 import java.util.Date
 
-import models.Transaction.CoinCreation
-
 object Block {
 
   def apply(index: Int,
@@ -12,7 +10,7 @@ object Block {
             previousHash: Option[String],
             timestamp: Date = new Date()): Block = {
 
-    this(index, nonce, sort(transactions), previousHash, timestamp)
+    new Block(index, nonce, sort(transactions), previousHash, timestamp)
   }
 
   private def sort(transactions: Seq[Transaction]) = transactions.sortBy(_.serialise)

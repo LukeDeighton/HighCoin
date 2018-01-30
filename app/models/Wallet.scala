@@ -1,7 +1,6 @@
 package models
 
-import cryptocurrency.Blockchain
-import models.{Transaction => Tx}
+import cryptocurrency.{Blockchain, TransactionOps}
 import org.bitcoinj.core.{Base58, ECKey}
 
 object Wallet {
@@ -12,16 +11,12 @@ object Wallet {
     val publicKey = Base58.encode(key.getPubKey)
     this(Some(privateKey), publicKey)
   }
+
+  def create(address: String): Wallet = this(None, address)
 }
 
 case class Wallet(signingKey: Option[String], address: String) {
 
-  def getTransactions(blockchain: Blockchain): Seq[Transaction] = {
-    blockchain.chain
-      .flatMap(_.transactions)
-      .filter {
-        case Tx.CoinCreation(_, addr) => addr == address
-        case Tx.CoinTransfer(_, outputs) => outputs.exists(_.address == this.address)
-      }
-  }
+  def getUnspentTransactions(blockchain: Blockchain) =
+    new TransactionOps(blockchain).getTransactions(address)
 }

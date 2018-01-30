@@ -24,16 +24,4 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
 
   def addTransaction(transaction: Transaction): Blockchain =
     this.copy(unboundTransactions :+ transaction)
-
-  def calculateProofOfWork(unprovedBlock: Block): Block = {
-    var block = unprovedBlock
-    var nonce = 0
-    while (!isValidProof(block)) {
-      nonce += 1
-      block = block.withNonce(nonce)
-    }
-    block
-  }
-
-  def isValidProof(block: Block): Boolean = block.hash.toHex.startsWith("000000")
 }
