@@ -15,5 +15,5 @@ object ProofOfWork {
   }
 
   def isValidProof(block: Block): Boolean =
-    block.hash.toHex.startsWith("0000")
+    block.hash.hex.startsWith("0000")
 }

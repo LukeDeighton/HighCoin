@@ -19,7 +19,7 @@ object Hash256 {
 
 class Hash256(val bytes: Array[Byte]) extends AnyVal {
 
-  def toHex: String = Utils.HEX.encode(bytes)
+  def hex: String = Utils.HEX.encode(bytes)
 
-  def toBase58: String = Base58.encode(bytes)
+  def base58: String = Base58.encode(bytes)
 }

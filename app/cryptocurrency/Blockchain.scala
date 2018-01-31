@@ -1,8 +1,8 @@
 package cryptocurrency
 
-import models.{Block, Transaction, Transaction => Tx}
+import models.{Block, Transaction}
 
-case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) {
+case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) extends BlockchainOps {
 
   def nextBlockIndex: Int = chain.size
 
@@ -13,7 +13,7 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
       index = nextBlockIndex,
       transactions = unboundTransactions,
       nonce = nonce,
-      previousHash = lastBlock.map(_.hash.toHex)
+      previousHash = lastBlock.map(_.hash.hex)
     )
 
   def addBlock(nonce: Int): Blockchain =
@@ -27,7 +27,7 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
 
   val allTransactions: Seq[Transaction] = chain.flatMap(_.transactions)
 
-  val allTxOutputs: Seq[Tx.Output] = allTransactions.flatMap(_.outputs)
+  val allTransactionOutputs: Seq[Transaction.Output] = allTransactions.flatMap(_.outputs)
 
-  val allTxInputs: Seq[Tx.Input] = allTransactions.flatMap(_.inputs)
+  val allTransactionInputs: Seq[Transaction.Input] = allTransactions.flatMap(_.inputs)
 }
