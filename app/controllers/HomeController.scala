@@ -19,7 +19,7 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     Ok(asJson(Wallet.create()))
   }
 
-  def newTransaction = Action { implicit request: Request[AnyContent] =>
+  def newTransaction: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     val jsonBodyStr = request.body.asJson.get.toString()
     val txRequest = as[TransactionRequest](jsonBodyStr)
 
@@ -28,21 +28,26 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
       return UnprocessableEntity("Insufficient funds")
     }
 
-    wallet.getTransactionOutputs
-    val transferTx = Transaction(
-      inputs = Seq(
-        Transaction.Input(
-          txRequest.senderSignature,
-          outputRef = Transaction.OutputRef(transaction.hash().toHex, 0)
-        )),
-      outputs = Seq(
-        Transaction.Output(txRequest.value, txRequest.recipientAddress)
-      )
-    )
+    val transactions = wallet.getSpendableTransactions
+    transactions.headOption match {
+      case Some(transaction) =>
+        val transferTx = Transaction(
+          inputs = Seq(
+            Transaction.Input(
+              txRequest.senderSignature,
+              outputRef = Transaction.OutputRef(transaction.hash().toHex, 0)
+            )),
+          outputs = Seq(
+            Transaction.Output(txRequest.value, txRequest.recipientAddress)
+          )
+        )
 
-    blockchain = blockchain.addTransaction(transferTx)
+        blockchain = blockchain.addTransaction(transferTx)
 
-    Ok("Transaction will be added to block index: " + blockchain.nextBlockIndex)
+        Ok("Transaction will be added to block index: " + blockchain.nextBlockIndex)
+      case None =>
+        NotImplemented("Invalid spendable transaction")
+    }
   }
 
   def mine(address: String) = Action {

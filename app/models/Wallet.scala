@@ -18,7 +18,8 @@ object Wallet {
 
 case class Wallet(signingKey: Option[String], address: String) {
 
-  def getSpendableTransaction()
+  def getSpendableTransactions(implicit blockchain: Blockchain): Seq[Transaction] =
+    TransactionOps.getTransactions(address)
 
   def getTransactionOutputs(implicit blockchain: Blockchain): Seq[Tx.Output] =
     TransactionOps.getTransactionOutputs(address)
