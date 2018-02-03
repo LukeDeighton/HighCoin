@@ -1,4 +1,4 @@
-package models
+package cryptocurrency.models
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.bitcoinj.core.{Base58, Utils}

@@ -1,14 +1,12 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# https://www.playframework.com/documentation/latest/ScalaRouting
-# ~~~~
+# client side ops
+POST    /wallet/send                controllers.ClientController.send
+GET     /wallet/new                 controllers.ClientController.generateWallet
+GET     /wallet/balance             controllers.ClientController.getBalance(address: String)
+GET     /mine                       controllers.ClientController.mine(address: String)
 
-# An example controller showing a sample home page
-POST    /transactions/new           controllers.HomeController.newTransaction
-GET     /mine                       controllers.HomeController.mine(address: String)
-GET     /chain                      controllers.HomeController.getBlockchain
-GET     /wallet/new                 controllers.HomeController.generateWallet
-GET     /wallet/balance             controllers.HomeController.getBalance(address: String)
+# server side ops
+GET     /chain                      controllers.HighCoinController.getBlockchain
+POST    /transactions               controllers.HighCoinController.newTransaction
 
-# Map static resources from the /public folder to the /assets URL path
+
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

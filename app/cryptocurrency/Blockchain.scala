@@ -2,6 +2,7 @@ package cryptocurrency
 
 import models.{Block, Transaction}
 
+//TODO mutable blockchain structure
 case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) extends BlockchainOps {
 
   def nextBlockIndex: Int = chain.size
