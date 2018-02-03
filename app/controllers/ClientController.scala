@@ -46,14 +46,11 @@ class ClientController @Inject()(cc: ControllerComponents) extends AbstractContr
     val jsonBodyStr = req.body.asJson.get.toString()
     val request = as[SendRequest](jsonBodyStr)
 
-    val wallet = Wallet.create(request.senderAddress)
     if (request.value > wallet.getBalance) {
       UnprocessableEntity("Insufficient funds")
     } else {
-//      val transaction =
-//        Transaction.sendCoin(request.senderAddress, request.senderSignature, request.recipientAddress, request.value)
-//      blockchain = blockchain.addTransaction(transaction)
-
+      val spendTransaction = wallet.send(request.value, request.recipientAddress)
+      blockchain = blockchain.addTransaction(spendTransaction)
       Ok("Transaction will be added to block index: " + blockchain.nextBlockIndex)
     }
   }

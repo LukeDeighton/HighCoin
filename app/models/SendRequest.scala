@@ -1,3 +1,3 @@
 package models
 
-case class SendRequest(senderSignature: String, senderAddress: String, recipientAddress: String, value: BigDecimal)
+case class SendRequest(recipientAddress: String, value: BigDecimal)

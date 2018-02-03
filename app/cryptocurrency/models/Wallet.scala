@@ -1,7 +1,6 @@
 package cryptocurrency.models
 
 import cryptocurrency.Blockchain
-import cryptocurrency.models.Transaction.InputOutputs
 import org.bitcoinj.core.{Base58, ECKey}
 
 object Wallet {
@@ -22,32 +21,20 @@ case class Wallet(signingKey: Option[String], address: String) {
     blockchain.getUnspentTransactionOutputs(address).map(_.value).sum
 
   def send(value: BigDecimal, recipientAddress: String)(implicit blockchain: Blockchain): Transaction = {
-
     val signature = "Signature" //TODO
+    val unspentPairs = blockchain.getUnspentTransactionOutputPairs(address)
+    val balance = unspentPairs.collect { case (_, output) => output.value }.sum
 
+    if (balance < value) throw new IllegalStateException("Insufficient funds to send transaction")
 
-
-    val transaction = spendTransactionOutput()
+//    var spentValue = 0
+    val (transaction, unspentOutput) = unspentPairs.head //TODO
+    val outputIndex = transaction.outputs.indexOf(unspentOutput)
+    val outputRef = Transaction.OutputRef(transaction.hash.hex, outputIndex)
 
     Transaction(
-      inputs = Seq(
-        Transaction.Input(
-          signature,
-          outputRef = Transaction.OutputRef(spendableTransaction.hash.hex, 0)
-        )),
-      outputs = Seq(
-        Transaction.Output(value, recipientAddress)
-      )
+      inputs = Seq(Transaction.Input(signature, outputRef)),
+      outputs = Seq(Transaction.Output(value, recipientAddress))
     )
-    ???
-  }
-
-  def spendTransactionOutput(spendValue: BigDecimal, transaction: Transaction, outputIndex: Int): InputOutputs = {
-    val output = transaction.getOutput(outputIndex)
-    output.value match {
-      case value if value < spendValue  => throw new IllegalArgumentException(s"Transaction output too small to spend value")
-      case value if value == spendValue => //spend completely
-      case _                            => //spend partially - need to send back money - does this involve signing now?
-    }
   }
 }

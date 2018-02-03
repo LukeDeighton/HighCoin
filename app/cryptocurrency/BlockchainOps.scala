@@ -11,15 +11,16 @@ trait BlockchainOps { self: Blockchain =>
   def getTransactions(address: String): Seq[Transaction] =
     allTransactions.filter(_.outputs.exists(_.address == address))
 
-  def findOutput(outputRef: Transaction.OutputRef): Option[Transaction.Output] =
-    allTransactions
-      .find(_.hash.hex == outputRef.hash)
-      .map { transaction =>
-        transaction.outputs(outputRef.outputIndex)
-      }
+  def getUnspentTransactionOutputPairs(address: String): Seq[(Transaction, Transaction.Output)] =
+    getTransactions(address).flatMap { transaction =>
+      transaction
+        .getOutputs(address)
+        .filterNot(hasTransactionOutputRef)
+        .map(transaction -> _)
+    }
 
   def getUnspentTransactionOutputs(address: String): Seq[Transaction.Output] =
-    getTransactionOutputs(address).filterNot(hasTransactionOutputRef)
+    getUnspentTransactionOutputPairs(address).map(_._2)
 
   def hasTransactionOutputRef(output: Transaction.Output): Boolean =
     allTransactionInputs.exists { input =>
