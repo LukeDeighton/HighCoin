@@ -15,13 +15,16 @@ trait BlockchainOps { self: Blockchain =>
     getTransactions(address).flatMap { transaction =>
       transaction
         .getOutputs(address)
-        .filterNot(hasTransactionOutputRef)
+        .filterNot { output =>
+
+        }
         .map(transaction -> _)
     }
 
   def getUnspentTransactionOutputs(address: String): Seq[Transaction.Output] =
     getUnspentTransactionOutputPairs(address).map(_._2)
 
+  //TODO this doesn't work - it doesn't distinguish outputs correctly
   def hasTransactionOutputRef(output: Transaction.Output): Boolean =
     allTransactionInputs.exists { input =>
       findTransactionOutput(input.outputRef).isDefined

@@ -27,14 +27,27 @@ case class Wallet(signingKey: Option[String], address: String) {
 
     if (balance < value) throw new IllegalStateException("Insufficient funds to send transaction")
 
-//    var spentValue = 0
-    val (transaction, unspentOutput) = unspentPairs.head //TODO
-    val outputIndex = transaction.outputs.indexOf(unspentOutput)
-    val outputRef = Transaction.OutputRef(transaction.hash.hex, outputIndex)
+    var spentValue: BigDecimal = 0
+    var inputs = Seq.empty[Transaction.Input]
+    var outputs = Seq.empty[Transaction.Output]
+    var pairIndex = 0
+    while (spentValue < value) {
+      val (transaction, unspentOutput) =
+        unspentPairs
+          .lift(pairIndex)
+          .getOrElse(throw new IllegalStateException("Ran out of spendable outputs"))
 
-    Transaction(
-      inputs = Seq(Transaction.Input(signature, outputRef)),
-      outputs = Seq(Transaction.Output(value, recipientAddress))
-    )
+      //TODO determine whether to completely spend, underspend etc.
+
+      val outputIndex = transaction.outputs.indexOf(unspentOutput)
+      val outputRef = Transaction.OutputRef(transaction.hash.hex, outputIndex)
+
+      spentValue = spentValue + unspentOutput.value
+      pairIndex = pairIndex + 1
+
+      inputs = inputs :+ Transaction.Input(signature, outputRef)
+      outputs = outputs :+ Transaction.Output(value, recipientAddress)
+    }
+    Transaction(inputs, outputs)
   }
 }
