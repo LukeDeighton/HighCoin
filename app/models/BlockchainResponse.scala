@@ -1,7 +1,6 @@
 package models
 
-import cryptocurrency.Blockchain
-import cryptocurrency.models.Block
+import cryptocurrency.models.{Block, Blockchain}
 
 object BlockchainResponse {
 

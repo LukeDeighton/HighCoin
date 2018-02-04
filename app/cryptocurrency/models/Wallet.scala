@@ -1,6 +1,5 @@
 package cryptocurrency.models
 
-import cryptocurrency.Blockchain
 import org.bitcoinj.core.{Base58, ECKey}
 
 object Wallet {
@@ -21,7 +20,7 @@ case class Wallet(signingKey: Option[String], address: String) {
     blockchain.getUnspentTransactionOutputs(address).map(_.value).sum
 
   def send(value: BigDecimal, recipientAddress: String)(implicit blockchain: Blockchain): Transaction = {
-    val signature = "Signature" //TODO
+    val signature = s"$address Signature" //TODO
     val unspentPairs = blockchain.getUnspentTransactionOutputPairs(address)
     val balance = unspentPairs.collect { case (_, output) => output.value }.sum
 
@@ -36,6 +35,11 @@ case class Wallet(signingKey: Option[String], address: String) {
         unspentPairs
           .lift(pairIndex)
           .getOrElse(throw new IllegalStateException("Ran out of spendable outputs"))
+
+      val remainingSpendValue = value - spentValue
+      if (unspentOutput.value == remainingSpendValue) {
+
+      }
 
       //TODO determine whether to completely spend, underspend etc.
 

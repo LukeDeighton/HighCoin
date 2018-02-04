@@ -1,7 +1,10 @@
 package cryptocurrency.models
 
+import scala.util.Random
+
 case class Transaction(inputs: Seq[Transaction.Input],
-                       outputs: Seq[Transaction.Output]) {
+                       outputs: Seq[Transaction.Output],
+                       nonce: Int) {
 
   lazy val serialise: String = {
     val inputHashStr = inputs.size + inputs.foldLeft("")(_ + _.serialise)
@@ -22,13 +25,22 @@ case class Transaction(inputs: Seq[Transaction.Input],
 
 object Transaction {
 
+  private val random = new Random()
+  private def randomNonce = random.nextInt(Integer.MAX_VALUE)
+
   def createCoin(value: BigDecimal, address: String): Transaction =
     Transaction(
       inputs = Seq.empty,
-      outputs = Seq(Output(value, address)))
+      outputs = Seq(Output(value, address)),
+      nonce = randomNonce)
+
+  def apply(inputs: Seq[Transaction.Input],
+            outputs: Seq[Transaction.Output]): Transaction = {
+    this(inputs, outputs, randomNonce)
+  }
 
   case class Input(signature: String,
-                   outputRef: OutputRef) {
+                   outputRef: OutputRef) extends TransactionInputOps {
 
     lazy val serialise: String = signature + outputRef.serialise
   }
