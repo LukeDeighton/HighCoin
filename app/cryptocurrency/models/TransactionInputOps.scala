@@ -2,9 +2,11 @@ package cryptocurrency.models
 
 trait TransactionInputOps { self: Transaction.Input =>
 
-  def transactionOutputPair(implicit blockchain: Blockchain): Option[(Transaction, Transaction.Output)] =
+  def transactionOutputPair(implicit blockchain: Blockchain): Option[TransactionOutputPair] =
     blockchain.allTransactions.find(_.hash.hex == outputRef.hash).map { transaction =>
-      transaction -> transaction.outputs(outputRef.outputIndex)
+      TransactionOutputPair(transaction, transaction.outputs(outputRef.outputIndex))
     }
 
+  def transactionOutput(implicit blockchain: Blockchain): Option[Transaction.Output] =
+    transactionOutputPair.map(_.output)
 }

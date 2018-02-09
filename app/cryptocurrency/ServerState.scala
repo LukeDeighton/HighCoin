@@ -4,7 +4,5 @@ import cryptocurrency.models.Blockchain
 
 object ServerState {
 
-  implicit var blockchain: Blockchain = Blockchain(
-    unboundTransactions = Seq.empty,
-    chain = Seq.empty)
+  implicit var blockchain: Blockchain = Blockchain.empty
 }

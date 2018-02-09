@@ -15,9 +15,6 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
       previousHash = lastBlock.map(_.hash.hex)
     )
 
-  def addBlock(nonce: Int): Blockchain =
-    addBlock(createBlock(nonce))
-
   def addBlock(block: Block): Blockchain =
     Blockchain(Seq.empty, this.chain :+ block)
 
@@ -29,4 +26,12 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
   val allTransactionOutputs: Seq[Transaction.Output] = allTransactions.flatMap(_.outputs)
 
   val allTransactionInputs: Seq[Transaction.Input] = allTransactions.flatMap(_.inputs)
+}
+
+object Blockchain {
+
+  val empty = Blockchain(
+    unboundTransactions = Seq.empty,
+    chain = Seq.empty
+  )
 }

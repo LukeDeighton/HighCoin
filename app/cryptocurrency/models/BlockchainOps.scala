@@ -8,14 +8,14 @@ trait BlockchainOps { self: Blockchain =>
   def getTransactions(address: String): Seq[Transaction] =
     allTransactions.filter(_.outputs.exists(_.address == address))
 
-  def getTransactionOutputPairs(address: String): Seq[(Transaction, Transaction.Output)] =
+  def getTransactionOutputPairs(address: String): Seq[TransactionOutputPair] =
     getTransactions(address).flatMap { transaction =>
       transaction
         .getOutputs(address)
-        .map(transaction -> _)
+        .map(TransactionOutputPair(transaction, _))
     }
 
-  def getUnspentTransactionOutputPairs(address: String): Seq[(Transaction, Transaction.Output)] = {
+  def getUnspentTransactionOutputPairs(address: String): Seq[TransactionOutputPair] = {
     var unspentPairs = getTransactionOutputPairs(address)
     allTransactionInputs.foreach { input =>
       input.transactionOutputPair(self).foreach { pair =>
@@ -26,5 +26,5 @@ trait BlockchainOps { self: Blockchain =>
   }
 
   def getUnspentTransactionOutputs(address: String): Seq[Transaction.Output] =
-    getUnspentTransactionOutputPairs(address).map(_._2)
+    getUnspentTransactionOutputPairs(address).map(_.output)
 }

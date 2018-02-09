@@ -14,7 +14,7 @@ class HighCoinController @Inject()(cc: ControllerComponents) extends AbstractCon
 
   import ServerState.blockchain
 
-  def newTransaction = Action { implicit req: Request[AnyContent] =>
+  def addTransaction = Action { implicit req: Request[AnyContent] =>
     val jsonBodyStr = req.body.asJson.get.toString()
     val transaction = as[Transaction](jsonBodyStr)
     //TODO validate transaction

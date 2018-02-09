@@ -2,9 +2,9 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import cryptocurrency.{ServerState, ClientState}
-import cryptocurrency.ProofOfWork
-import cryptocurrency.models.{Transaction, Wallet}
+import cryptocurrency.models.Wallet
+import cryptocurrency.services.MiningService.mineNextBlock
+import cryptocurrency.{ClientState, ServerState}
 import models.SendRequest
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import utils.Json.{as, asJson}
@@ -15,41 +15,36 @@ class ClientController @Inject()(cc: ControllerComponents) extends AbstractContr
 
   //TODO APIs that should run on client
 
-  import ServerState.blockchain
   import ClientState.wallet
+  import ServerState.blockchain
 
-  def generateWallet = Action {
+  def createWallet = Action {
     wallet = Wallet.create()
     Ok(asJson(wallet))
   }
 
   def getBalance(address: String) = Action {
-    val balance = Wallet.create(address).getBalance
+    val balance = Wallet.create(address).balance
     Ok(balance.toString())
   }
 
-  def mine(address: String) = Action {
-    val rewardAmount = 25
+  def mineBlock(address: String) = Action {
+    val rewardValue = 25
 
-    val nextBlock =
-      blockchain
-        .createBlock(nonce = 0)
-        .withTransaction(
-          Transaction.createCoin(rewardAmount, address))
-    val validNextBlock = ProofOfWork.calculate(nextBlock)
-    blockchain = blockchain.addBlock(validNextBlock)
+    val nextBlock = mineNextBlock(address, rewardValue)
 
-    Ok(s"Successfully mined a block. Rewarding address: $address with $rewardAmount highcoins")
+    blockchain = blockchain.addBlock(nextBlock)
+
+    Ok(s"Successfully mined a block. Rewarding address: $address with $rewardValue highcoins")
   }
 
-  def send = Action { implicit req: Request[AnyContent] =>
-    val jsonBodyStr = req.body.asJson.get.toString()
-    val request = as[SendRequest](jsonBodyStr)
+  def sendCoins = Action { implicit request: Request[AnyContent] =>
+    val sendReq = as[SendRequest](request.body)
 
-    if (request.value > wallet.getBalance) {
+    if (sendReq.value > wallet.balance) {
       UnprocessableEntity("Insufficient funds")
     } else {
-      val spendTransaction = wallet.send(request.value, request.recipientAddress)
+      val spendTransaction = wallet.send(sendReq.value, sendReq.recipientAddress)
       blockchain = blockchain.addTransaction(spendTransaction)
       Ok("Transaction will be added to block index: " + blockchain.nextBlockIndex)
     }

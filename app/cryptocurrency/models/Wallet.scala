@@ -1,6 +1,7 @@
 package cryptocurrency.models
 
 import org.bitcoinj.core.{Base58, ECKey}
+import TransactionImplicits._
 
 object Wallet {
 
@@ -16,42 +17,61 @@ object Wallet {
 
 case class Wallet(signingKey: Option[String], address: String) {
 
-  def getBalance(implicit blockchain: Blockchain): BigDecimal =
-    blockchain.getUnspentTransactionOutputs(address).map(_.value).sum
+  def balance(implicit blockchain: Blockchain): BigDecimal =
+    blockchain
+      .getUnspentTransactionOutputs(address)
+      .price
 
   def send(value: BigDecimal, recipientAddress: String)(implicit blockchain: Blockchain): Transaction = {
-    val signature = s"$address Signature" //TODO
-    val unspentPairs = blockchain.getUnspentTransactionOutputPairs(address)
-    val balance = unspentPairs.collect { case (_, output) => output.value }.sum
+    val unspentOutputPairs = getSpendableTransactionOutputPairs(value)
+
+    val inputs = getTransactionInputs(unspentOutputPairs)
+    val outputs = getTransactionOutputs(value, unspentOutputPairs.price, recipientAddress)
+
+    assertEqualPrice(inputs, outputs)
+
+    Transaction(inputs, outputs)
+  }
+
+  private def getSpendableTransactionOutputPairs(value: BigDecimal)(implicit blockchain: Blockchain): Seq[TransactionOutputPair] = {
+    val unspentOutputPairs = blockchain.getUnspentTransactionOutputPairs(address)
+    val balance = unspentOutputPairs.price
 
     if (balance < value) throw new IllegalStateException("Insufficient funds to send transaction")
 
     var spentValue: BigDecimal = 0
-    var inputs = Seq.empty[Transaction.Input]
-    var outputs = Seq.empty[Transaction.Output]
-    var pairIndex = 0
-    while (spentValue < value) {
-      val (transaction, unspentOutput) =
-        unspentPairs
-          .lift(pairIndex)
-          .getOrElse(throw new IllegalStateException("Ran out of spendable outputs"))
+    unspentOutputPairs.takeWhile { outputPair =>
+      val take = spentValue < value
+      spentValue = spentValue + outputPair.output.value
+      take
+    }
+  }
 
-      val remainingSpendValue = value - spentValue
-      if (unspentOutput.value == remainingSpendValue) {
+  private def getTransactionInputs(unspentOutputPairs: Seq[TransactionOutputPair]): Seq[Transaction.Input] =
+    unspentOutputPairs.map { outputPair =>
+      val outputRef = outputPair.transactionOutputRef
+      Transaction.Input(signature, outputRef)
+    }
 
+  private def getTransactionOutputs(spendValue: BigDecimal, spendableValue: BigDecimal, recipientAddress: String): Seq[Transaction.Output] = {
+    if (spendableValue < spendValue) {
+      throw new IllegalStateException("Insufficient funds to spend transaction outputs")
+    }
+
+    val selfTransactionOutputOpt =
+      if (spendValue != spendableValue) {
+        val unspentValue = spendableValue - spendValue
+        Some(Transaction.Output(unspentValue, address))
+      } else {
+        None
       }
 
-      //TODO determine whether to completely spend, underspend etc.
-
-      val outputIndex = transaction.outputs.indexOf(unspentOutput)
-      val outputRef = Transaction.OutputRef(transaction.hash.hex, outputIndex)
-
-      spentValue = spentValue + unspentOutput.value
-      pairIndex = pairIndex + 1
-
-      inputs = inputs :+ Transaction.Input(signature, outputRef)
-      outputs = outputs :+ Transaction.Output(value, recipientAddress)
-    }
-    Transaction(inputs, outputs)
+    Seq(Transaction.Output(spendValue, recipientAddress)) ++ selfTransactionOutputOpt
   }
+
+  private def assertEqualPrice(inputs: Seq[Transaction.Input], outputs: Seq[Transaction.Output])(implicit blockchain: Blockchain): Unit =
+    if (inputs.price != outputs.price)
+      throw new IllegalStateException("Spent inputs doesn't equal spendable outputs")
+
+  def signature = s"$address Signature" //TODO - use private key and public key
 }
