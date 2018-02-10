@@ -36,6 +36,24 @@ class WalletTest extends FlatSpec with Matchers {
 
     walletA.balance shouldBe 35
     walletB.balance shouldBe 15
+
+    spendTransaction = walletA.send(34, recipientAddress = "B")
+    blockchain = blockchain.addTransaction(spendTransaction)
+
+    nextBlock = mineNextBlock(rewardAddress = "C", rewardValue = 25)
+    blockchain = blockchain.addBlock(nextBlock)
+
+    walletA.balance shouldBe 1
+    walletB.balance shouldBe 49
+
+    spendTransaction = walletB.send(49, recipientAddress = "A")
+    blockchain = blockchain.addTransaction(spendTransaction)
+
+    nextBlock = mineNextBlock(rewardAddress = "C", rewardValue = 25)
+    blockchain = blockchain.addBlock(nextBlock)
+
+    walletA.balance shouldBe 50
+    walletB.balance shouldBe 0
   }
 
 }

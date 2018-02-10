@@ -18,9 +18,10 @@ trait BlockchainOps { self: Blockchain =>
   def getUnspentTransactionOutputPairs(address: String): Seq[TransactionOutputPair] = {
     var unspentPairs = getTransactionOutputPairs(address)
     allTransactionInputs.foreach { input =>
-      input.transactionOutputPair(self).foreach { pair =>
-        unspentPairs = unspentPairs.filter(_ == pair) //only works if no two tx's have same hash
-      }
+      val pair = input
+        .transactionOutputPair(self)
+        .getOrElse(throw new IllegalStateException("Must find output ref from input"))
+      unspentPairs = unspentPairs.filterNot(_ == pair) //only works if no two tx's have same hash
     }
     unspentPairs
   }
