@@ -2,30 +2,38 @@ package cryptocurrency.models
 
 trait BlockchainOps { self: Blockchain =>
 
-  def getTransactionOutputs(address: String): Seq[Transaction.Output] =
+  implicit val blockchain: Blockchain = self
+
+  def getOutputs(address: String): Seq[Transaction.Output] =
     allTransactionOutputs.filter(_.address == address)
 
   def getTransactions(address: String): Seq[Transaction] =
     allTransactions.filter(_.outputs.exists(_.address == address))
 
-  def getTransactionOutputPairs(address: String): Seq[TransactionOutputPair] =
+  def getTransactionOutputs(address: String): Seq[TransactionOutputPair] =
     getTransactions(address).flatMap { transaction =>
       transaction
         .getOutputs(address)
         .map(TransactionOutputPair(transaction, _))
     }
 
-  def getUnspentTransactionOutputPairs(address: String): Seq[TransactionOutputPair] = {
-    var unspentPairs = getTransactionOutputPairs(address)
-    allTransactionInputs.foreach { input =>
-      val pair = input
-        .transactionOutputPair(self)
-        .getOrElse(throw new IllegalStateException("Must find output ref from input"))
-      unspentPairs = unspentPairs.filterNot(_ == pair) //only works if no two tx's have same hash
+  def getUnconnectedTransactionOutputs(address: String): Seq[TransactionOutputPair] =
+    getTransactionOutputs(address).filter { output =>
+      val connectedInputs = findAllConnectedTxInputs(output)
+      if (connectedInputs.size > 1)
+        throw new IllegalStateException("Invalid output - cannot be connected to multiple inputs") //TODO move into validation - double spend
+      connectedInputs.isEmpty
     }
-    unspentPairs
-  }
 
-  def getUnspentTransactionOutputs(address: String): Seq[Transaction.Output] =
-    getUnspentTransactionOutputPairs(address).map(_.output)
+  def getUnconnectedOutputs(address: String): Seq[Transaction.Output] =
+    getUnconnectedTransactionOutputs(address).map(_.output)
+
+  def findAllConnectedTxInputs(output: TransactionOutputPair): Seq[Transaction.Input] =
+    allTransactionInputs.filter { input =>
+      input.findAllConnectedTxOutputs.contains(output)
+    }
+
+  def findAllTransactions(txHashHex: String): Seq[Transaction] =
+    allTransactions.filter(_.hash.hex == txHashHex)
+
 }

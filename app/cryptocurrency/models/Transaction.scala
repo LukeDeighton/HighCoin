@@ -4,12 +4,12 @@ import scala.util.Random
 
 case class Transaction(inputs: Seq[Transaction.Input],
                        outputs: Seq[Transaction.Output],
-                       nonce: Int) {
+                       nonce: Int) extends TransactionOps {
 
   lazy val serialise: String = {
     val inputHashStr = inputs.size + inputs.foldLeft("")(_ + _.serialise)
     val outputHashStr = outputs.size + outputs.foldLeft("")(_ + _.serialise)
-    inputHashStr + outputHashStr
+    inputHashStr + outputHashStr + nonce
   }
 
   lazy val hash: Hash256 = Sha256.digest(serialise)
@@ -56,5 +56,4 @@ object Transaction {
 
     lazy val serialise: String = value + address
   }
-
 }

@@ -18,8 +18,10 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
   def addBlock(block: Block): Blockchain =
     Blockchain(Seq.empty, this.chain :+ block)
 
-  def addTransaction(transaction: Transaction): Blockchain =
+  def addTransaction(transaction: Transaction): Blockchain = {
+    transaction.validate(this)
     this.copy(unboundTransactions :+ transaction)
+  }
 
   val allTransactions: Seq[Transaction] = chain.flatMap(_.transactions)
 

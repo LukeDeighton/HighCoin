@@ -5,7 +5,7 @@ object TransactionImplicits {
   implicit class TransactionInputs(inputs: Seq[Transaction.Input]) {
 
     def price(implicit blockchain: Blockchain): BigDecimal = {
-      inputs.map(_.transactionOutput).flatMap(_.map(_.value)).sum
+      inputs.flatMap(_.findConnectedOutput).price
     }
   }
 

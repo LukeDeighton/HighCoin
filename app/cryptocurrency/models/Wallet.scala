@@ -17,30 +17,31 @@ object Wallet {
 
 case class Wallet(signingKey: Option[String], address: String) {
 
+  def signature: String = s"$address Signature" //TODO - use private key and public key
+
   def balance(implicit blockchain: Blockchain): BigDecimal =
     blockchain
-      .getUnspentTransactionOutputs(address)
+      .getUnconnectedOutputs(address)
       .price
 
   def send(value: BigDecimal, recipientAddress: String)(implicit blockchain: Blockchain): Transaction = {
-    val unspentOutputPairs = getSpendableTransactionOutputPairs(value)
+    val unspentOutputs = getSpendableTransactionOutputs(value)
 
-    val inputs = getTransactionInputs(unspentOutputPairs)
-    val outputs = getTransactionOutputs(value, unspentOutputPairs.price, recipientAddress)
+    val inputs = getTransactionInputs(unspentOutputs)
+    val outputs = getTransactionOutputs(value, unspentOutputs.price, recipientAddress)
 
     assertEqualPrice(inputs, outputs)
 
     Transaction(inputs, outputs)
   }
 
-  private def getSpendableTransactionOutputPairs(value: BigDecimal)(implicit blockchain: Blockchain): Seq[TransactionOutputPair] = {
-    val unspentOutputPairs = blockchain.getUnspentTransactionOutputPairs(address)
-    val balance = unspentOutputPairs.price
-
-    if (balance < value) throw new IllegalStateException("Insufficient funds to send transaction")
+  private def getSpendableTransactionOutputs(value: BigDecimal)(implicit blockchain: Blockchain): Seq[TransactionOutputPair] = {
+    val unspentOutputs = blockchain.getUnconnectedTransactionOutputs(address)
+    if (unspentOutputs.price < value)
+      throw new IllegalStateException("Insufficient funds to send transaction")
 
     var spentValue: BigDecimal = 0
-    unspentOutputPairs.takeWhile { outputPair =>
+    unspentOutputs.takeWhile { outputPair =>
       val take = spentValue < value
       spentValue = spentValue + outputPair.output.value
       take
@@ -49,7 +50,7 @@ case class Wallet(signingKey: Option[String], address: String) {
 
   private def getTransactionInputs(unspentOutputPairs: Seq[TransactionOutputPair]): Seq[Transaction.Input] =
     unspentOutputPairs.map { outputPair =>
-      val outputRef = outputPair.transactionOutputRef
+      val outputRef = outputPair.makeOutputRef()
       Transaction.Input(signature, outputRef)
     }
 
@@ -72,6 +73,4 @@ case class Wallet(signingKey: Option[String], address: String) {
   private def assertEqualPrice(inputs: Seq[Transaction.Input], outputs: Seq[Transaction.Output])(implicit blockchain: Blockchain): Unit =
     if (inputs.price != outputs.price)
       throw new IllegalStateException("Spent inputs doesn't equal spendable outputs")
-
-  def signature = s"$address Signature" //TODO - use private key and public key
 }
