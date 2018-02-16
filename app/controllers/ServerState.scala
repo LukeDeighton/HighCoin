@@ -1,6 +1,6 @@
-package cryptocurrency
+package controllers
 
-import cryptocurrency.models.Blockchain
+import cryptocurrency.Blockchain
 
 object ServerState {
 

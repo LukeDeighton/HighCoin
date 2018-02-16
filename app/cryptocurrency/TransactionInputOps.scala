@@ -1,4 +1,4 @@
-package cryptocurrency.models
+package cryptocurrency
 
 trait TransactionInputOps { input: Transaction.Input =>
 

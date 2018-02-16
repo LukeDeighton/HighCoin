@@ -1,6 +1,5 @@
 package cryptocurrency
 
-import cryptocurrency.models.{Blockchain, Wallet}
 import cryptocurrency.services.MiningService.mineNextBlock
 import org.scalatest.{FlatSpec, Matchers}
 

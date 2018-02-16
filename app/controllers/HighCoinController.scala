@@ -2,9 +2,7 @@ package controllers
 
 import javax.inject._
 
-import cryptocurrency.ServerState
-import cryptocurrency.models.Transaction
-import models.BlockchainResponse
+import cryptocurrency.Transaction
 import play.api.mvc._
 import utils.Json._
 import utils.JsonWriteables._

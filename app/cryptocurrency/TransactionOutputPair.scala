@@ -1,4 +1,4 @@
-package cryptocurrency.models
+package cryptocurrency
 
 case class TransactionOutputPair(transaction: Transaction, output: Transaction.Output) {
 

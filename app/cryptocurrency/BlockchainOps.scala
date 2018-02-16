@@ -1,4 +1,4 @@
-package cryptocurrency.models
+package cryptocurrency
 
 trait BlockchainOps { self: Blockchain =>
 

@@ -1,4 +1,4 @@
-package cryptocurrency.models
+package cryptocurrency
 
 import scala.util.Random
 

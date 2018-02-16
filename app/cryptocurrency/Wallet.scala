@@ -1,7 +1,7 @@
-package cryptocurrency.models
+package cryptocurrency
 
+import cryptocurrency.TransactionImplicits._
 import org.bitcoinj.core.{Base58, ECKey}
-import TransactionImplicits._
 
 object Wallet {
 
@@ -38,7 +38,7 @@ case class Wallet(signingKey: Option[String], address: String) {
   private def getSpendableTransactionOutputs(value: BigDecimal)(implicit blockchain: Blockchain): Seq[TransactionOutputPair] = {
     val unspentOutputs = blockchain.getUnconnectedTransactionOutputs(address)
     if (unspentOutputs.price < value)
-      throw new IllegalStateException("Insufficient funds to send transaction")
+      throw new IllegalStateException("Insufficient funds to spend transaction outputs")
 
     var spentValue: BigDecimal = 0
     unspentOutputs.takeWhile { outputPair =>
@@ -55,9 +55,8 @@ case class Wallet(signingKey: Option[String], address: String) {
     }
 
   private def getTransactionOutputs(spendValue: BigDecimal, spendableValue: BigDecimal, recipientAddress: String): Seq[Transaction.Output] = {
-    if (spendableValue < spendValue) {
+    if (spendableValue < spendValue)
       throw new IllegalStateException("Insufficient funds to spend transaction outputs")
-    }
 
     val selfTransactionOutputOpt =
       if (spendValue != spendableValue) {

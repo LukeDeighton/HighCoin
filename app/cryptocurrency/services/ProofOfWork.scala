@@ -1,6 +1,6 @@
-package cryptocurrency
+package cryptocurrency.services
 
-import models.Block
+import cryptocurrency.Block
 
 object ProofOfWork {
 

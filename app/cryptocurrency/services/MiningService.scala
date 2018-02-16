@@ -1,7 +1,6 @@
 package cryptocurrency.services
 
-import cryptocurrency.ProofOfWork
-import cryptocurrency.models.{Block, Blockchain, Transaction}
+import cryptocurrency.{Block, Blockchain, Transaction}
 
 object MiningService {
 

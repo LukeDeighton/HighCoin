@@ -1,6 +1,6 @@
-package models
+package controllers
 
-import cryptocurrency.models.{Block, Blockchain}
+import cryptocurrency.{Block, Blockchain}
 
 object BlockchainResponse {
 

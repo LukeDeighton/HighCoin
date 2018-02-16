@@ -1,4 +1,4 @@
-package cryptocurrency.models
+package cryptocurrency
 
 //TODO mutable blockchain structure
 case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) extends BlockchainOps {

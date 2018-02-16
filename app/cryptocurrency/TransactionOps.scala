@@ -1,4 +1,4 @@
-package cryptocurrency.models
+package cryptocurrency
 
 trait TransactionOps { transaction: Transaction =>
 

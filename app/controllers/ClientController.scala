@@ -2,10 +2,8 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import cryptocurrency.models.Wallet
 import cryptocurrency.services.MiningService.mineNextBlock
-import cryptocurrency.{ClientState, ServerState}
-import models.SendRequest
+import cryptocurrency.Wallet
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import utils.Json.{as, asJson}
 import utils.JsonWriteables._
