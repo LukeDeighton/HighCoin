@@ -1,0 +1,13 @@
+# client side ops
+POST    /wallet/send                com.github.lukedeighton.highcoin.controllers.ClientController.sendCoins
+GET     /wallet/new                 com.github.lukedeighton.highcoin.controllers.ClientController.createWallet
+GET     /wallet/balance             com.github.lukedeighton.highcoin.controllers.ClientController.getBalance(address: String)
+GET     /mine                       com.github.lukedeighton.highcoin.controllers.ClientController.mineBlock(address: String)
+
+# server side ops
+GET     /chain                      com.github.lukedeighton.highcoin.controllers.HighCoinController.getBlockchain
+POST    /transactions               com.github.lukedeighton.highcoin.controllers.HighCoinController.addTransaction
+
+# Prefix must match `play.assets.urlPrefix`
+GET        /assets/*file                 controllers.Assets.at(file)
+GET        /versionedAssets/*file        controllers.Assets.versioned(path="/public", file: Asset)
