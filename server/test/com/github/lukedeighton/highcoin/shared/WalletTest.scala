@@ -1,6 +1,6 @@
-package cryptocurrency
+package com.github.lukedeighton.highcoin.shared
 
-import cryptocurrency.services.MiningService.mineNextBlock
+import MiningService.mineNextBlock
 import org.scalatest.{FlatSpec, Matchers}
 
 class WalletTest extends FlatSpec with Matchers {
