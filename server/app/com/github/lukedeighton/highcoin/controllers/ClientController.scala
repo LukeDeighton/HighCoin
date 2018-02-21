@@ -2,11 +2,13 @@ package com.github.lukedeighton.highcoin.controllers
 
 import javax.inject.{Inject, Singleton}
 
+import com.github.lukedeighton.highcoin.models.SendRequest
 import com.github.lukedeighton.highcoin.shared.MiningService.mineNextBlock
 import com.github.lukedeighton.highcoin.shared.Wallet
 import com.github.lukedeighton.highcoin.utils.Json.{as, asJson}
 import com.github.lukedeighton.highcoin.utils.JsonWriteables._
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
+import com.github.lukedeighton.highcoin.{ClientState, ServerState}
 
 @Singleton
 class ClientController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {

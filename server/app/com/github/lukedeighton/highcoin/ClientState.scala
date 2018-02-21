@@ -1,4 +1,4 @@
-package com.github.lukedeighton.highcoin.controllers
+package com.github.lukedeighton.highcoin
 
 import com.github.lukedeighton.highcoin.shared.Wallet
 

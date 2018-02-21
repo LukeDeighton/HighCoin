@@ -2,10 +2,11 @@ package com.github.lukedeighton.highcoin.controllers
 
 import javax.inject._
 
+import com.github.lukedeighton.highcoin.ServerState
 import com.github.lukedeighton.highcoin.shared.Transaction
-import play.api.mvc._
 import com.github.lukedeighton.highcoin.utils.Json._
 import com.github.lukedeighton.highcoin.utils.JsonWriteables._
+import play.api.mvc._
 
 @Singleton
 class HighCoinController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
@@ -21,6 +22,6 @@ class HighCoinController @Inject()(cc: ControllerComponents) extends AbstractCon
   }
 
   def getBlockchain = Action {
-    Ok(asJson(BlockchainResponse(blockchain)))
+    Ok(asJson(blockchain))
   }
 }
