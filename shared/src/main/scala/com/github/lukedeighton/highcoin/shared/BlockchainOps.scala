@@ -17,7 +17,8 @@ trait BlockchainOps { self: Blockchain =>
         .map(TransactionOutputPair(transaction, _))
     }
 
-  def getUnconnectedTransactionOutputs(address: String): Seq[TransactionOutputPair] =
+  def getUnconnectedTransactionOutputs(address: String)
+                                      (implicit context: ScalaJsContext): Seq[TransactionOutputPair] =
     getTransactionOutputs(address).filter { output =>
       val connectedInputs = findAllConnectedTxInputs(output)
       if (connectedInputs.size > 1)
@@ -25,15 +26,18 @@ trait BlockchainOps { self: Blockchain =>
       connectedInputs.isEmpty
     }
 
-  def getUnconnectedOutputs(address: String): Seq[Transaction.Output] =
+  def getUnconnectedOutputs(address: String)
+                           (implicit context: ScalaJsContext): Seq[Transaction.Output] =
     getUnconnectedTransactionOutputs(address).map(_.output)
 
-  def findAllConnectedTxInputs(output: TransactionOutputPair): Seq[Transaction.Input] =
+  def findAllConnectedTxInputs(output: TransactionOutputPair)
+                              (implicit context: ScalaJsContext): Seq[Transaction.Input] =
     allTransactionInputs.filter { input =>
       input.findAllConnectedTxOutputs.contains(output)
     }
 
-  def findAllTransactions(txHashHex: String): Seq[Transaction] =
+  def findAllTransactions(txHashHex: String)
+                         (implicit context: ScalaJsContext): Seq[Transaction] =
     allTransactions.filter(_.hash.hex == txHashHex)
 
 }

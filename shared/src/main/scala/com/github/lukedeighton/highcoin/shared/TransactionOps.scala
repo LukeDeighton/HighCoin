@@ -2,7 +2,7 @@ package com.github.lukedeighton.highcoin.shared
 
 trait TransactionOps { transaction: Transaction =>
 
-  def validate(implicit blockchain: Blockchain): Unit = {
+  def validate(implicit blockchain: Blockchain, context: ScalaJsContext): Unit = {
     transaction.inputs.foreach { input =>
       val connectedOutput = input.findAllConnectedTxOutputs
       if (connectedOutput.isEmpty)

@@ -1,11 +1,11 @@
-@(demo: com.github.lukedeighton.highcoin.models.Demo)
+@()
 
 @main("HighCoin - Blockchain Demo") {
 <h2>Wallet</h2>
 <ul>
-  <li>Address: @{demo.wallet.address}</li>
-  <li>Balance: @{demo.balance}</li>
-  <li>Mine: <button type="button">Start</button></li>
+  <li>Address: <span id="address" ></span></li>
+  <li>Balance: <span id="balance"></span></li>
+  <li>Mine: <button type="button" id="mine">Start</button></li>
 </ul>
 <h2>Blockchain</h2>
   <div id="blockchain"></div>

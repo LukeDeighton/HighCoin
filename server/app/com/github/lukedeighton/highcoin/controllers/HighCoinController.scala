@@ -7,6 +7,7 @@ import com.github.lukedeighton.highcoin.shared.Transaction
 import com.github.lukedeighton.highcoin.utils.Json._
 import com.github.lukedeighton.highcoin.utils.JsonWriteables._
 import play.api.mvc._
+import com.github.lukedeighton.highcoin.shared.ScalaContext.scalaContext
 
 @Singleton
 class HighCoinController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {

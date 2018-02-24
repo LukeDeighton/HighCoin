@@ -9,6 +9,7 @@ import com.github.lukedeighton.highcoin.utils.Json.{as, asJson}
 import com.github.lukedeighton.highcoin.utils.JsonWriteables._
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import com.github.lukedeighton.highcoin.{ClientState, ServerState}
+import com.github.lukedeighton.highcoin.shared.ScalaContext.scalaContext
 
 @Singleton
 class ClientController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {

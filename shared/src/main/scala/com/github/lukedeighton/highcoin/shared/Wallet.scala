@@ -1,14 +1,13 @@
 package com.github.lukedeighton.highcoin.shared
 
 import TransactionImplicits._
-import org.bitcoinj.core.{Base58, ECKey}
 
 object Wallet {
 
-  def create(): Wallet = {
-    val key = new ECKey()
-    val privateKey = Base58.encode(key.getPrivKeyBytes)
-    val publicKey = Base58.encode(key.getPubKey)
+  def create()(implicit context: ScalaJsContext): Wallet = {
+    val (privateKeyBytes, publicKeyBytes) = context.genECKey
+    val privateKey = context.base58Encode(privateKeyBytes)
+    val publicKey = context.base58Encode(publicKeyBytes)
     this(Some(privateKey), publicKey)
   }
 
@@ -19,12 +18,13 @@ case class Wallet(signingKey: Option[String], address: String) {
 
   def signature: String = s"$address Signature" //TODO - use private key and public key
 
-  def balance(implicit blockchain: Blockchain): BigDecimal =
+  def balance(implicit blockchain: Blockchain, context: ScalaJsContext): BigDecimal =
     blockchain
       .getUnconnectedOutputs(address)
       .price
 
-  def send(value: BigDecimal, recipientAddress: String)(implicit blockchain: Blockchain): Transaction = {
+  def send(value: BigDecimal, recipientAddress: String)
+          (implicit blockchain: Blockchain, context: ScalaJsContext): Transaction = {
     val unspentOutputs = getSpendableTransactionOutputs(value)
 
     val inputs = getTransactionInputs(unspentOutputs)
@@ -35,7 +35,8 @@ case class Wallet(signingKey: Option[String], address: String) {
     Transaction(inputs, outputs)
   }
 
-  private def getSpendableTransactionOutputs(value: BigDecimal)(implicit blockchain: Blockchain): Seq[TransactionOutputPair] = {
+  private def getSpendableTransactionOutputs(value: BigDecimal)
+                                            (implicit blockchain: Blockchain, context: ScalaJsContext): Seq[TransactionOutputPair] = {
     val unspentOutputs = blockchain.getUnconnectedTransactionOutputs(address)
     if (unspentOutputs.price < value)
       throw new IllegalStateException("Insufficient funds to spend transaction outputs")
@@ -48,7 +49,8 @@ case class Wallet(signingKey: Option[String], address: String) {
     }
   }
 
-  private def getTransactionInputs(unspentOutputPairs: Seq[TransactionOutputPair]): Seq[Transaction.Input] =
+  private def getTransactionInputs(unspentOutputPairs: Seq[TransactionOutputPair])
+                                  (implicit context: ScalaJsContext): Seq[Transaction.Input] =
     unspentOutputPairs.map { outputPair =>
       val outputRef = outputPair.makeOutputRef()
       Transaction.Input(signature, outputRef)
@@ -69,7 +71,8 @@ case class Wallet(signingKey: Option[String], address: String) {
     Seq(Transaction.Output(spendValue, recipientAddress)) ++ selfTransactionOutputOpt
   }
 
-  private def assertEqualPrice(inputs: Seq[Transaction.Input], outputs: Seq[Transaction.Output])(implicit blockchain: Blockchain): Unit =
+  private def assertEqualPrice(inputs: Seq[Transaction.Input], outputs: Seq[Transaction.Output])
+                              (implicit blockchain: Blockchain, context: ScalaJsContext): Unit =
     if (inputs.price != outputs.price)
       throw new IllegalStateException("Spent inputs doesn't equal spendable outputs")
 }

@@ -12,7 +12,7 @@ case class Transaction(inputs: Seq[Transaction.Input],
     inputHashStr + outputHashStr + nonce
   }
 
-  lazy val hash: Hash256 = Sha256.digest(serialise)
+  def hash(implicit context: ScalaJsContext): Hash256 = Sha256.digest(serialise)
 
   def getOutput(index: Int): Transaction.Output =
     outputs

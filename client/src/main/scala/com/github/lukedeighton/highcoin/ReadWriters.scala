@@ -2,20 +2,30 @@ package com.github.lukedeighton.highcoin
 
 import java.util.Date
 
-import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Transaction}
+import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Transaction, Wallet}
 import upickle.default.{ReadWriter => RW}
 import upickle.{Js, default}
 
 object ReadWriters {
+
+  implicit def walletRW: RW[Wallet] = RW(default.macroW[Wallet].write, readWallet)
+
+  def readWallet: PartialFunction[Js.Value, Wallet] = {
+    case walletObj: Js.Obj =>
+      val wallet = walletObj.value.toMap
+      val signingKey = wallet.get("signingKey").map(_.str.toString)
+      val address = wallet("address").str.toString
+      Wallet(signingKey, address)
+  }
 
   implicit def dateRW: RW[Date] = RW(date => Js.Str(date.toString), {
     case jsDate => new Date(jsDate.str.toString)
   })
 
   implicit def transactionOutputRW: RW[Transaction.Output] =
-    RW(default.macroW[Transaction.Output].write, transactionOutputRead)
+    RW(default.macroW[Transaction.Output].write, readTransactionOutput)
 
-  def transactionOutputRead: PartialFunction[Js.Value, Transaction.Output] = { // doesn't like BigDecimal
+  def readTransactionOutput: PartialFunction[Js.Value, Transaction.Output] = { // doesn't like BigDecimal
     case outputObj: Js.Obj =>
       val output = outputObj.value.toMap
       val value = BigDecimal(output("value").num.toString)
@@ -29,9 +39,9 @@ object ReadWriters {
 
   implicit def transactionRW: RW[Transaction] = default.macroRW
 
-  implicit def blockRW: RW[Block] = RW(default.macroW[Block].write, blockRead)
+  implicit def blockRW: RW[Block] = RW(default.macroW[Block].write, readBlock)
 
-  def blockRead: PartialFunction[Js.Value, Block] = { //All because I couldn't work out Options
+  def readBlock: PartialFunction[Js.Value, Block] = { //All because I couldn't work out Options
     case blockObj: Js.Obj =>
       val block = blockObj.value.toMap
       val height = block("height").num.asInstanceOf[Int]

@@ -7,7 +7,8 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
 
   def lastBlock: Option[Block] = chain.lastOption
 
-  def createBlock(nonce: Int): Block =
+  def createBlock(nonce: Int)
+                 (implicit context: ScalaJsContext): Block =
     Block(
       index = nextBlockIndex,
       transactions = unboundTransactions,
@@ -18,8 +19,9 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
   def addBlock(block: Block): Blockchain =
     Blockchain(Seq.empty, this.chain :+ block)
 
-  def addTransaction(transaction: Transaction): Blockchain = {
-    transaction.validate(this)
+  def addTransaction(transaction: Transaction)
+                    (implicit context: ScalaJsContext): Blockchain = {
+    transaction.validate(this, context)
     this.copy(unboundTransactions :+ transaction)
   }
 
@@ -32,8 +34,8 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
 
 object Blockchain {
 
-  val empty = Blockchain(
-    unboundTransactions = Seq.empty,
-    chain = Seq.empty
-  )
+  val empty =
+    Blockchain(
+      unboundTransactions = Seq.empty,
+      chain = Seq.empty)
 }

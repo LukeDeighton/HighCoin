@@ -1,25 +1,23 @@
 package com.github.lukedeighton.highcoin.shared
 
-import org.apache.commons.codec.digest.DigestUtils
-import org.bitcoinj.core.{Base58, Utils}
-
 object Sha256 {
 
-  def digest(value: String): Hash256 = {
-    new Hash256(DigestUtils.sha256(value))
-  }
+  def digest(value: String)(implicit context: ScalaJsContext): Hash256 =
+    new Hash256(context.sha256(value))
 }
 
 object Hash256 {
 
-  def fromHex(value: String): Hash256 = new Hash256(Utils.HEX.decode(value))
+  def fromHex(value: String)(implicit context: ScalaJsContext): Hash256 =
+    new Hash256(context.hexDecode(value))
 
-  def fromBase58(value: String): Hash256 = new Hash256(Base58.decode(value))
+  def fromBase58(value: String)(implicit context: ScalaJsContext): Hash256 =
+    new Hash256(context.base58Decode(value))
 }
 
-class Hash256(val bytes: Array[Byte]) extends AnyVal {
+class Hash256(val bytes: Array[Byte])(implicit context: ScalaJsContext) {
 
-  def hex: String = Utils.HEX.encode(bytes)
+  def hex: String = context.hexEncode(bytes)
 
-  def base58: String = Base58.encode(bytes)
+  def base58: String = context.base58Encode(bytes)
 }

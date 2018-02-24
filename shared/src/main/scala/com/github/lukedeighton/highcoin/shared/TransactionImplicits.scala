@@ -4,7 +4,7 @@ object TransactionImplicits {
 
   implicit class TransactionInputs(inputs: Seq[Transaction.Input]) {
 
-    def price(implicit blockchain: Blockchain): BigDecimal = {
+    def price(implicit blockchain: Blockchain, context: ScalaJsContext): BigDecimal = {
       inputs.flatMap(_.findConnectedOutput).price
     }
   }

@@ -1,7 +1,8 @@
 package com.github.lukedeighton.highcoin.shared
 
-import MiningService.mineNextBlock
+import com.github.lukedeighton.highcoin.shared.MiningService.mineNextBlock
 import org.scalatest.{FlatSpec, Matchers}
+import com.github.lukedeighton.highcoin.shared.ScalaContext.scalaContext
 
 class WalletTest extends FlatSpec with Matchers {
 
