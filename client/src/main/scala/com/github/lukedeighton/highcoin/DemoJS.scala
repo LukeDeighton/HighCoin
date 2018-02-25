@@ -1,25 +1,47 @@
 package com.github.lukedeighton.highcoin
 
+import com.github.lukedeighton.highcoin.JsContext.jsContext
+import com.github.lukedeighton.highcoin.shared.MiningService.mineNextBlock
 import com.github.lukedeighton.highcoin.shared.{Blockchain, Wallet}
 import org.scalajs.dom
+import org.scalajs.dom.raw.Event
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.github.lukedeighton.highcoin.shared.JsContext.jsContext
 
 object DemoJS {
 
   implicit var blockchain: Blockchain = _
+
   var wallet: Wallet = _
+  var highCoinService: HighCoinService = _
+  var isMining: Boolean = false
 
   def main(args: Array[String]): Unit = {
-    val highcoinService = new HighCoinService(host = "http://localhost:9000")
+    highCoinService = new HighCoinService(host = "http://localhost:9000")
     for {
-      blockchain <- highcoinService.getBlockchain
-      wallet <- highcoinService.createWallet
+      blockchain <- highCoinService.getBlockchain
+      wallet <- highCoinService.createWallet //TODO create clientside rather than call to server
     } yield {
-      this.blockchain = blockchain
       this.wallet = wallet
-      updateWallet(wallet)
+      handleBlockchainChange(blockchain)
+      addClickListeners()
     }
+  }
+
+  def addClickListeners(): Unit = {
+    dom.document.getElementById("reload-blockchain")
+      .addEventListener("click", reloadBlockchain)
+
+    dom.document.getElementById("mine")
+      .addEventListener("click", startMining)
+  }
+
+  def reloadBlockchain(event: Event): Unit =
+    highCoinService.getBlockchain.foreach(handleBlockchainChange)
+
+  private def handleBlockchainChange(blockchain: Blockchain): Unit = {
+    this.blockchain = blockchain
+    updateWallet(wallet)
   }
 
   def updateWallet(wallet: Wallet): Unit = {
@@ -28,32 +50,9 @@ object DemoJS {
     dom.document.getElementById("balance").textContent = wallet.balance.toString()
   }
 
-//  def downloadWallet(): Unit = { //TODO this should be created client side
-//    wallet = Wallet.create()
-//  }
-//
-//  def updateBalance(): Unit = {
-//    dom.document.getElementById("balance").textContent = wallet.balance.toString()
-//  }
-//
-//  def downloadBlockchain(): Unit = {
-//    val xhr = new dom.XMLHttpRequest()
-//    xhr.open("GET", "http://localhost:9000/chain")
-//    xhr.onload = { (e: dom.Event) =>
-//      if (xhr.status == 200) {
-//        val responseBody = xhr.responseText
-//        dom.console.log(responseBody)
-//        blockchain = read[Blockchain](responseBody)
-//        reloadBlockchainInfo()
-//      }
-//    }
-//    xhr.send()
-//  }
-//
-//  def reloadBlockchainInfo(): Unit = {
-//    val blockchainContainer = dom.document.getElementById("blockchain")
-//    blockchainContainer.textContent = blockchain.toString
-//
-//  }
-
+  private def startMining(event: Event): Unit = {
+    isMining = !isMining //TODO add way to cancel mining
+    if (isMining)
+      mineNextBlock(wallet.address)
+  }
 }

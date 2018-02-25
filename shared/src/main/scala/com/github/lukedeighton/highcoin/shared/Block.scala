@@ -22,7 +22,7 @@ case class Block(height: Int,
                  previousHash: Option[String],
                  timestamp: Date = new Date()) {
 
-  def withTransaction(transaction: Transaction): Block = copy(transactions = Block.sort(transactions :+ transaction))
+  def addTransaction(transaction: Transaction): Block = copy(transactions = Block.sort(transactions :+ transaction))
 
   def withNonce(nonce: Int): Block = copy(nonce = nonce)
 

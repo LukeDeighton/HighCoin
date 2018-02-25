@@ -1,5 +1,6 @@
-package com.github.lukedeighton.highcoin.shared
+package com.github.lukedeighton.highcoin
 
+import com.github.lukedeighton.highcoin.shared.ScalaJsContext
 import org.apache.commons.codec.digest.DigestUtils
 import org.bitcoinj.core.{Base58, ECKey, Utils}
 

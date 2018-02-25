@@ -4,21 +4,20 @@ import javax.inject.{Inject, Singleton}
 
 import com.github.lukedeighton.highcoin.models.SendRequest
 import com.github.lukedeighton.highcoin.shared.MiningService.mineNextBlock
-import com.github.lukedeighton.highcoin.shared.Wallet
+import com.github.lukedeighton.highcoin.shared.{MiningService, Wallet}
 import com.github.lukedeighton.highcoin.utils.Json.{as, asJson}
 import com.github.lukedeighton.highcoin.utils.JsonWriteables._
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import com.github.lukedeighton.highcoin.{ClientState, ServerState}
-import com.github.lukedeighton.highcoin.shared.ScalaContext.scalaContext
+import com.github.lukedeighton.highcoin.ScalaContext.scalaContext
 
 @Singleton
 class ClientController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  //TODO APIs that should run on client
-
   import ClientState.wallet
   import ServerState.blockchain
 
+  //TODO not moved to the client until impl ECKey JS side
   def createWallet = Action {
     wallet = Wallet.create()
     Ok(asJson(wallet))
@@ -30,13 +29,11 @@ class ClientController @Inject()(cc: ControllerComponents) extends AbstractContr
   }
 
   def mineBlock(address: String) = Action {
-    val rewardValue = 25
-
-    val nextBlock = mineNextBlock(address, rewardValue)
+    val nextBlock = mineNextBlock(address)
 
     blockchain = blockchain.addBlock(nextBlock)
 
-    Ok(s"Successfully mined a block. Rewarding address: $address with $rewardValue highcoins")
+    Ok(s"Successfully mined a block. Rewarding address: $address with ${MiningService.rewardValue} highcoins")
   }
 
   def sendCoins = Action { implicit request: Request[AnyContent] =>

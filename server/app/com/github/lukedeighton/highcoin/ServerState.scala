@@ -1,7 +1,6 @@
 package com.github.lukedeighton.highcoin
 
 import com.github.lukedeighton.highcoin.shared.Blockchain
-import com.github.lukedeighton.highcoin.shared.ScalaContext.scalaContext
 
 object ServerState {
 

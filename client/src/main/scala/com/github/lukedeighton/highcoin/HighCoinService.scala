@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.{Promise, Thenable, |}
 
-import ReadWriters._
+import UPickleJsonSerialisers._
 
 class HighCoinService(host: String) {
 
@@ -26,7 +26,7 @@ class HighCoinService(host: String) {
       (resolve: js.Function1[T | Thenable[T], _], reject: js.Function1[scala.Any, _]) =>
         xhr.onload = { (e: dom.Event) =>
           if (xhr.status >= 200 && xhr.status <= 299) {
-            dom.console.log(s"successfuly response to $method $url")
+            dom.console.log(s"Successful response from $method $url")
             val responseBodyStr = xhr.responseText
             val responseBody = read[T](responseBodyStr)
             dom.console.log(responseBodyStr)

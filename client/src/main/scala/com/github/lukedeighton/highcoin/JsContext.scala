@@ -1,4 +1,6 @@
-package com.github.lukedeighton.highcoin.shared
+package com.github.lukedeighton.highcoin
+
+import com.github.lukedeighton.highcoin.shared.ScalaJsContext
 
 object JsContext {
 

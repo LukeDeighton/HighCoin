@@ -6,7 +6,7 @@ import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Transaction, 
 import upickle.default.{ReadWriter => RW}
 import upickle.{Js, default}
 
-object ReadWriters {
+object UPickleJsonSerialisers {
 
   implicit def walletRW: RW[Wallet] = RW(default.macroW[Wallet].write, readWallet)
 
