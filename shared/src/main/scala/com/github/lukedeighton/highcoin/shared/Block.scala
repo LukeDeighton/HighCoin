@@ -29,5 +29,5 @@ case class Block(height: Int,
   def serialise: String = height.toString + nonce.toString +
     transactions.size + transactions.foldLeft("")(_ + _.serialise) + previousHash.getOrElse("")
 
-  def hash(implicit context: ScalaJsContext): Hash256 = Sha256.digest(this.toString)
+  def hash(implicit context: ScalaJsContext): Hash256 = Sha256.digest(serialise)
 }
