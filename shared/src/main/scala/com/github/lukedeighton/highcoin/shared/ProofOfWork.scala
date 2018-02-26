@@ -1,9 +1,8 @@
 package com.github.lukedeighton.highcoin.shared
 
-object ProofOfWork {
+object ProofOfWork { //TODO add way to interrupt while loop
 
-  def calculate(unproved: Block)
-               (implicit context: ScalaJsContext): Block = {
+  def calculate(unproved: Block)(implicit context: ScalaJsContext): Block = {
     var block = unproved
     var nonce = 0
     while (!isValidProof(block)) {
@@ -13,7 +12,6 @@ object ProofOfWork {
     block
   }
 
-  def isValidProof(block: Block)
-                  (implicit context: ScalaJsContext): Boolean =
+  def isValidProof(block: Block)(implicit context: ScalaJsContext): Boolean =
     block.hash.hex.startsWith("0000")
 }
