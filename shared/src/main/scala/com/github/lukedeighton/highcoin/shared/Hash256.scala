@@ -15,9 +15,11 @@ object Hash256 {
     new Hash256(context.base58Decode(value))
 }
 
-class Hash256(val bytes: Array[Byte])(implicit context: ScalaJsContext) {
+class Hash256(val bytes: ByteArray)(implicit context: ScalaJsContext) {
 
   def hex: String = context.hexEncode(bytes)
 
   def base58: String = context.base58Encode(bytes)
 }
+
+trait ByteArray

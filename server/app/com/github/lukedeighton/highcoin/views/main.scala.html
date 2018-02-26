@@ -10,6 +10,7 @@
   </head>
   <body>
     @content
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/sha256.min.js")'></script>
     @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
   </body>
 </html>

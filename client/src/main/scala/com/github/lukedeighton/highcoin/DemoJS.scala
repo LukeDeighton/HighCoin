@@ -4,7 +4,9 @@ import com.github.lukedeighton.highcoin.JsContext.jsContext
 import com.github.lukedeighton.highcoin.shared.MiningService.mineNextBlock
 import com.github.lukedeighton.highcoin.shared.{Blockchain, Wallet}
 import org.scalajs.dom
+import org.scalajs.dom.crypto.{HashAlgorithm, crypto}
 import org.scalajs.dom.raw.Event
+import scala.scalajs.js
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -13,14 +15,14 @@ object DemoJS {
   implicit var blockchain: Blockchain = _
 
   var wallet: Wallet = _
-  var highCoinService: HighCoinService = _
+  var client: HighCoinClient = _
   var isMining: Boolean = false
 
   def main(args: Array[String]): Unit = {
-    highCoinService = new HighCoinService(host = "http://localhost:9000")
+    client = new HighCoinClient(host = "http://localhost:9000")
     for {
-      blockchain <- highCoinService.getBlockchain
-      wallet <- highCoinService.createWallet //TODO create clientside rather than call to server
+      blockchain <- client.getBlockchain
+      wallet <- client.createWallet //TODO create clientside rather than call to server
     } yield {
       this.wallet = wallet
       handleBlockchainChange(blockchain)
@@ -33,11 +35,11 @@ object DemoJS {
       .addEventListener("click", reloadBlockchain)
 
     dom.document.getElementById("mine")
-      .addEventListener("click", startMining)
+      .addEventListener("click", toggleMining)
   }
 
   def reloadBlockchain(event: Event): Unit =
-    highCoinService.getBlockchain.foreach(handleBlockchainChange)
+    client.getBlockchain.foreach(handleBlockchainChange)
 
   private def handleBlockchainChange(blockchain: Blockchain): Unit = {
     this.blockchain = blockchain
@@ -50,7 +52,7 @@ object DemoJS {
     dom.document.getElementById("balance").textContent = wallet.balance.toString()
   }
 
-  private def startMining(event: Event): Unit = {
+  private def toggleMining(event: Event): Unit = {
     isMining = !isMining //TODO add way to cancel mining
     if (isMining)
       mineNextBlock(wallet.address)

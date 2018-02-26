@@ -10,7 +10,7 @@ import scala.scalajs.js.{Promise, Thenable, |}
 
 import UPickleJsonSerialisers._
 
-class HighCoinService(host: String) {
+class HighCoinClient(host: String) {
 
   def createWallet: Future[Wallet] = get[Wallet]("/wallet/new")
 
