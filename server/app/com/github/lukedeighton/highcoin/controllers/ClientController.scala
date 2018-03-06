@@ -29,11 +29,10 @@ class ClientController @Inject()(cc: ControllerComponents) extends AbstractContr
   }
 
   def mineBlock(address: String) = Action {
-    val nextBlock = mineNextBlock(address)
-
-    blockchain = blockchain.addBlock(nextBlock)
-
-    Ok(s"Successfully mined a block. Rewarding address: $address with ${MiningService.rewardValue} highcoins")
+    mineNextBlock(address).map { nextBlock =>
+      blockchain = blockchain.addBlock(nextBlock)
+      Ok(s"Successfully mined a block. Rewarding address: $address with ${MiningService.rewardValue} highcoins")
+    }.getOrElse(UnprocessableEntity("Failed to mine next block"))
   }
 
   def sendCoins = Action { implicit request: Request[AnyContent] =>

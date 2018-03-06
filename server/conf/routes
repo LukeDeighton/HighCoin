@@ -7,10 +7,11 @@ GET     /mine                       com.github.lukedeighton.highcoin.controllers
 # server side ops
 GET     /chain                      com.github.lukedeighton.highcoin.controllers.HighCoinController.getBlockchain
 POST    /transactions               com.github.lukedeighton.highcoin.controllers.HighCoinController.addTransaction
+POST    /block/next                 com.github.lukedeighton.highcoin.controllers.HighCoinController.receiveBlock
 
 # demo
 GET     /demo                       com.github.lukedeighton.highcoin.controllers.DemoController.interactiveWallet
 
 # Prefix must match `play.assets.urlPrefix`
-GET        /assets/*file                 controllers.Assets.at(file)
-GET        /versionedAssets/*file        controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                 controllers.Assets.at(file)
+GET     /versionedAssets/*file        controllers.Assets.versioned(path="/public", file: Asset)

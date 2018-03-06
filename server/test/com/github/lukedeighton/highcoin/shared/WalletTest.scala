@@ -1,10 +1,10 @@
 package com.github.lukedeighton.highcoin.shared
 
 import com.github.lukedeighton.highcoin.shared.MiningService.mineNextBlock
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{FlatSpec, Matchers, OptionValues}
 import com.github.lukedeighton.highcoin.ScalaContext.scalaContext
 
-class WalletTest extends FlatSpec with Matchers {
+class WalletTest extends FlatSpec with Matchers with OptionValues {
 
   "Wallet" should "correctly calculate the balance" in {
 
@@ -18,7 +18,7 @@ class WalletTest extends FlatSpec with Matchers {
     walletB.balance shouldBe 0
     walletC.balance shouldBe 0
 
-    var nextBlock = mineNextBlock(rewardAddress = "A")
+    var nextBlock = mineNextBlock(rewardAddress = "A").value
     blockchain = blockchain.addBlock(nextBlock)
 
     walletA.balance shouldBe 25
@@ -28,14 +28,14 @@ class WalletTest extends FlatSpec with Matchers {
     var spendTransaction = walletA.send(25, recipientAddress = "C")
     blockchain = blockchain.addTransaction(spendTransaction)
 
-    nextBlock = mineNextBlock(rewardAddress = "A")
+    nextBlock = mineNextBlock(rewardAddress = "A").value
     blockchain = blockchain.addBlock(nextBlock)
 
     walletA.balance shouldBe 25
     walletB.balance shouldBe 0
     walletC.balance shouldBe 25
 
-    nextBlock = mineNextBlock(rewardAddress = "A")
+    nextBlock = mineNextBlock(rewardAddress = "A").value
     blockchain = blockchain.addBlock(nextBlock)
 
     walletA.balance shouldBe 50
@@ -45,7 +45,7 @@ class WalletTest extends FlatSpec with Matchers {
     spendTransaction = walletA.send(15, recipientAddress = "B")
     blockchain = blockchain.addTransaction(spendTransaction)
 
-    nextBlock = mineNextBlock(rewardAddress = "C")
+    nextBlock = mineNextBlock(rewardAddress = "C").value
     blockchain = blockchain.addBlock(nextBlock)
 
     walletA.balance shouldBe 35
@@ -55,7 +55,7 @@ class WalletTest extends FlatSpec with Matchers {
     spendTransaction = walletA.send(34, recipientAddress = "B")
     blockchain = blockchain.addTransaction(spendTransaction)
 
-    nextBlock = mineNextBlock(rewardAddress = "C")
+    nextBlock = mineNextBlock(rewardAddress = "C").value
     blockchain = blockchain.addBlock(nextBlock)
 
     walletA.balance shouldBe 1
@@ -65,7 +65,7 @@ class WalletTest extends FlatSpec with Matchers {
     spendTransaction = walletB.send(49, recipientAddress = "A")
     blockchain = blockchain.addTransaction(spendTransaction)
 
-    nextBlock = mineNextBlock(rewardAddress = "C")
+    nextBlock = mineNextBlock(rewardAddress = "C").value
     blockchain = blockchain.addBlock(nextBlock)
 
     walletA.balance shouldBe 50

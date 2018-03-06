@@ -1,17 +1,20 @@
 package com.github.lukedeighton.highcoin.shared
 
-object ProofOfWork { //TODO add way to interrupt while loop
+object ProofOfWork {
 
-  def calculate(unproved: Block)(implicit context: ScalaJsContext): Block = {
+  def calculate(unproved: Block, nonceStart: Int = 0, nonceEnd: Int = Int.MaxValue)
+               (implicit context: ScalaJsContext): Option[Block] = {
     var block = unproved
-    var nonce = 0
-    while (!isValidProof(block)) {
+    var nonce = nonceStart
+    while (nonce <= nonceEnd) {
+      if (isValidProof(block)) return Some(block)
+
       nonce += 1
       block = block.withNonce(nonce)
     }
-    block
+    None
   }
 
-  def isValidProof(block: Block)(implicit context: ScalaJsContext): Boolean =
-    block.hash.hex.startsWith("0000")
+  private def isValidProof(block: Block)(implicit context: ScalaJsContext): Boolean =
+    block.hash.hex.startsWith("00000")
 }

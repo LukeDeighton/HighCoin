@@ -1,12 +1,9 @@
 package com.github.lukedeighton.highcoin
 
 import com.github.lukedeighton.highcoin.JsContext.jsContext
-import com.github.lukedeighton.highcoin.shared.MiningService.mineNextBlock
-import com.github.lukedeighton.highcoin.shared.{Blockchain, Wallet}
+import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Wallet}
 import org.scalajs.dom
-import org.scalajs.dom.crypto.{HashAlgorithm, crypto}
-import org.scalajs.dom.raw.Event
-import scala.scalajs.js
+import org.scalajs.dom.raw.{Element, Event}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -16,10 +13,15 @@ object DemoJS {
 
   var wallet: Wallet = _
   var client: HighCoinClient = _
-  var isMining: Boolean = false
+  var miner: HighCoinMiner = _
+
+  val mineButton: Element = dom.document.getElementById("mine")
+  val reloadButton: Element = dom.document.getElementById("reload-blockchain")
+  val hashesSpan: Element = dom.document.getElementById("hashes")
 
   def main(args: Array[String]): Unit = {
     client = new HighCoinClient(host = "http://localhost:9000")
+    miner = new HighCoinMiner
     for {
       blockchain <- client.getBlockchain
       wallet <- client.createWallet //TODO create clientside rather than call to server
@@ -28,14 +30,12 @@ object DemoJS {
       handleBlockchainChange(blockchain)
       addClickListeners()
     }
+    dom.window.setInterval(() => renderHashesPerSecond(), 500)
   }
 
   def addClickListeners(): Unit = {
-    dom.document.getElementById("reload-blockchain")
-      .addEventListener("click", reloadBlockchain)
-
-    dom.document.getElementById("mine")
-      .addEventListener("click", toggleMining)
+    reloadButton.addEventListener("click", reloadBlockchain)
+    mineButton.addEventListener("click", toggleMining)
   }
 
   def reloadBlockchain(event: Event): Unit =
@@ -52,9 +52,32 @@ object DemoJS {
     dom.document.getElementById("balance").textContent = wallet.balance.toString()
   }
 
-  private def toggleMining(event: Event): Unit = {
-    isMining = !isMining //TODO add way to cancel mining
-    if (isMining)
-      mineNextBlock(wallet.address)
+  private def renderHashesPerSecond(): Unit =
+    hashesSpan.textContent = s"${miner.hashesPerSecond()} hashes / sec"
+
+  private def toggleMining(event: Event): Unit =
+    if (miner.isMining) {
+      miner.cancelMining()
+    } else {
+      mineButton.textContent = "stop"
+      miner.beginMining().foreach {
+        case Some(nextBlock) => onMiningComplete(nextBlock)
+        case None            => onMiningCancelled()
+      }
+    }
+
+  private def onMiningCancelled(): Unit = {
+    dom.console.log("Mining cancelled")
+
+    mineButton.textContent = "start"
+  }
+
+  private def onMiningComplete(block: Block): Unit = {
+    dom.console.log("Successfully mined next block")
+
+    mineButton.textContent = "start"
+    client.broadcastBlock(block).foreach { res =>
+      dom.console.log(res)
+    }
   }
 }
