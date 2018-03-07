@@ -76,8 +76,8 @@ object DemoJS {
     dom.console.log("Successfully mined next block")
 
     mineButton.textContent = "start"
-    client.broadcastBlock(block).foreach { res =>
-      dom.console.log(res)
-    }
+//    client.broadcastBlock(block).foreach { res =>
+//      dom.console.log(res)
+//    }
   }
 }

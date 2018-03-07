@@ -10,7 +10,7 @@ trait ScalaJsContext {
 
   def base58Decode(base58Str: String): ByteArray
 
-  def sha256(input: String):ByteArray
+  def sha256(input: String): ByteArray
 
   def genECKey: (ByteArray, ByteArray)
 }

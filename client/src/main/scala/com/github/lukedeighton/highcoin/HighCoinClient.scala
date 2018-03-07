@@ -15,7 +15,7 @@ class HighCoinClient(host: String) {
 
   def getBlockchain: Future[Blockchain] = get[Blockchain]("/chain")
 
-  def broadcastBlock(block: Block): Future[String] = post("/block/next", block)
+//  def broadcastBlock(block: Block): Future[String] = post("/block/next", block)
 
   private def get[T : Reader](path: String): Future[T] = makeRequest[Unit, T]("GET", path)
 
