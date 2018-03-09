@@ -15,6 +15,6 @@ object ProofOfWork {
     None
   }
 
-  private def isValidProof(block: Block)(implicit context: ScalaJsContext): Boolean =
-    block.hash.hex.startsWith("00000")
+  def isValidProof(block: Block)(implicit context: ScalaJsContext): Boolean =
+    block.hash.hex.startsWith("0000")
 }

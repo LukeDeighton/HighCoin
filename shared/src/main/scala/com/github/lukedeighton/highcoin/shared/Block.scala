@@ -20,7 +20,7 @@ case class Block(height: Int,
                  nonce: Int,
                  transactions: Seq[Transaction],
                  previousHash: Option[String],
-                 timestamp: Date = new Date()) {
+                 timestamp: Date = new Date()) extends BlockOps {
 
   def addTransaction(transaction: Transaction): Block = copy(transactions = Block.sort(transactions :+ transaction))
 

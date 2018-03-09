@@ -67,17 +67,11 @@ object DemoJS {
     }
 
   private def onMiningCancelled(): Unit = {
-    dom.console.log("Mining cancelled")
-
     mineButton.textContent = "start"
   }
 
   private def onMiningComplete(block: Block): Unit = {
-    dom.console.log("Successfully mined next block")
-
     mineButton.textContent = "start"
-//    client.broadcastBlock(block).foreach { res =>
-//      dom.console.log(res)
-//    }
+    client.broadcastNextBlock(block).foreach(handleBlockchainChange)
   }
 }

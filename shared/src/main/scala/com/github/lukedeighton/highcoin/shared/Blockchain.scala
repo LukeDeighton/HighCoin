@@ -16,14 +16,13 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
       previousHash = lastBlock.map(_.hash.hex)
     )
 
-  def addBlock(block: Block): Blockchain =
+  def addBlock(block: Block)
+              (implicit context: ScalaJsContext): Blockchain =
     Blockchain(Seq.empty, this.chain :+ block)
 
   def addTransaction(transaction: Transaction)
-                    (implicit context: ScalaJsContext): Blockchain = {
-    transaction.validate(this, context)
+                    (implicit context: ScalaJsContext): Blockchain =
     this.copy(unboundTransactions :+ transaction)
-  }
 
   val allTransactions: Seq[Transaction] = chain.flatMap(_.transactions)
 

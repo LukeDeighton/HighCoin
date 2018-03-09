@@ -1,7 +1,6 @@
 package com.github.lukedeighton.highcoin
 
 import com.github.lukedeighton.highcoin.shared.{ByteArray, ScalaJsContext}
-import org.scalajs.dom
 
 import scala.scalajs.js.typedarray.Uint8Array
 

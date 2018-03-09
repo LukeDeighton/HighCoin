@@ -56,6 +56,7 @@ class HighCoinMiner {
 
   private def beginMining(resolve: js.Function1[Option[Block] | Thenable[Option[Block]], _], reject: js.Function1[scala.Any, _]): Unit = {
     if (!isMiningNextBlock) {
+      dom.console.log("Mining cancelled")
       resolve(None)
     } else {
       val nonceEnd = miningNonceStart + nonceIncrementCount
@@ -67,10 +68,13 @@ class HighCoinMiner {
         nonceEnd = nonceEnd)
       miningNonceStart = nonceEnd
 
-      if (nextBlockOpt.nonEmpty) {
-        resolve(nextBlockOpt)
-      } else { //TODO use web worker API?
-        dom.window.setTimeout(() => beginMining(resolve, reject), 0)
+      nextBlockOpt match {
+        case Some(nextBlock) =>
+          dom.console.log(s"found block with nonce: ${nextBlock.nonce} and hash: ${nextBlock.hash.hex}")
+          isMiningNextBlock = false
+          resolve(nextBlockOpt)
+        case None =>  //TODO use web worker API?
+          dom.window.setTimeout(() => beginMining(resolve, reject), 0)
       }
     }
   }

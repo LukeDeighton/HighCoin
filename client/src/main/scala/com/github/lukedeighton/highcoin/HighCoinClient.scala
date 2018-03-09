@@ -2,7 +2,7 @@ package com.github.lukedeighton.highcoin
 
 import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Wallet}
 import org.scalajs.dom
-import upickle.default._
+import upickle.default.{Reader, Writer, read, write}
 
 import scala.concurrent.Future
 import scala.scalajs.js
@@ -15,14 +15,14 @@ class HighCoinClient(host: String) {
 
   def getBlockchain: Future[Blockchain] = get[Blockchain]("/chain")
 
-//  def broadcastBlock(block: Block): Future[String] = post("/block/next", block)
+  def broadcastNextBlock(block: Block): Future[Blockchain] = post[Block, Blockchain]("/block/next", block)
 
   private def get[T : Reader](path: String): Future[T] = makeRequest[Unit, T]("GET", path)
 
   private def post[Req : Writer, Res : Reader](path: String, body: Req): Future[Res] =
     makeRequest[Req, Res]("POST", path, Some(body))
 
-  private def makeRequest[Req : Writer, Res : Reader](method: String, path: String, body: Option[Req] = None): Future[Res] = {
+  private def makeRequest[Req : Writer, Res : Reader](method: String, path: String, bodyOpt: Option[Req] = None): Future[Res] = {
     val url = host + path
     val xhr = new dom.XMLHttpRequest()
     xhr.open(method, url)
@@ -41,7 +41,16 @@ class HighCoinClient(host: String) {
           }
         }
     })
-    xhr.send()
+    bodyOpt match {
+      case Some(body) =>
+        xhr.setRequestHeader("Content-type", "application/json")
+        val bodyJson = write(body)
+        dom.console.log("sending json body:")
+        dom.console.log(bodyJson)
+        xhr.send(bodyJson)
+      case None =>
+        xhr.send()
+    }
     promise.toFuture
   }
 }
