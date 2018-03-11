@@ -11,6 +11,8 @@ trait TransactionOps { transaction: Transaction =>
         throw new IllegalStateException("Invalid input - input connected to multiple outputs")
     }
 
+    //TODO validate the input & output amounts
+
     //assuming the validate function is called before the transaction has made it's way into the blockchain
     val sameHashTransactions = blockchain.findAllTransactions(transaction.hash.hex)
     if (sameHashTransactions.nonEmpty)

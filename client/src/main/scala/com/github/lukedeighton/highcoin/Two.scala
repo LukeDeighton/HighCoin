@@ -43,8 +43,8 @@ class Circle(x: Double, y: Double, radius: Double) extends js.Object {
 class Rectangle(x: Double, y: Double, width: Double, height: Double) extends js.Object {
 
   var fill: String = js.native
-  var opacity: Double = js.native
-  def noStroke(): Unit = js.native
+  var stroke: String = js.native
+  var linewidth: Double = js.native
 }
 
 @js.native

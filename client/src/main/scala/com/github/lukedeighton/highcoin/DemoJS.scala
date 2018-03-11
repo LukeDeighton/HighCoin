@@ -1,12 +1,12 @@
 package com.github.lukedeighton.highcoin
 
 import com.github.lukedeighton.highcoin.JsContext.jsContext
-import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Wallet}
+import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, TransactionOutputPair, Wallet}
 import org.scalajs.dom
 import org.scalajs.dom.raw.{Element, Event, HTMLInputElement}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Try
+import scala.util.{Random, Try}
 
 object DemoJS {
 
@@ -25,6 +25,8 @@ object DemoJS {
   val sendButton: Element = dom.document.getElementById("send")
   val addressSpan: Element = dom.document.getElementById("address")
   val balanceSpan: Element = dom.document.getElementById("balance")
+
+  val random: Random = new Random()
 
   def main(args: Array[String]): Unit = {
     client = new HighCoinClient(host = "http://localhost:9000")
@@ -69,6 +71,9 @@ object DemoJS {
       return
     }
 
+    sendAddressInput.value = ""
+    sendAmountInput.value = ""
+
     val transaction = wallet.send(sendAddress, sendAmount)
     client.sendTransaction(transaction).foreach(handleBlockchainChange)
   }
@@ -100,38 +105,56 @@ object DemoJS {
     removeChildren(blockchainDiv)
     if (blockchain.blocks.isEmpty) return
 
-    val blockPadding = 15
+    val blockPadding = 100
     val transactionPadding = 10
     val blockWidth = 300  //TODO based on number of transactions?
     val transactionRadius = 40
-    val canvasHeight = blockWidth
-    val canvasWidth = blockchain.blocks.size * (blockWidth + blockPadding)
+    val canvasHeight = blockWidth + 20
+    val canvasWidth = (blockchain.blocks.size * blockWidth) +
+      (blockchain.blocks.size - 1) * blockPadding + 40
 
     val params = Params(canvasWidth, canvasHeight)
     val two = new Two(params).appendTo(blockchainDiv)
 
+    val yOffset = 10
     blockchain.blocks.foreach { block =>
-      val xOffset = block.height * (blockWidth + blockPadding) + blockPadding
-      val blockRect = two.makeRectangle(xOffset + blockWidth / 2, blockWidth / 2, blockWidth, blockWidth)
+      val xOffset = block.height * (blockWidth + blockPadding) + 20
+      val blockRect = two.makeRectangle(xOffset + blockWidth / 2, yOffset + blockWidth / 2, blockWidth, blockWidth)
 
-      blockRect.fill = "rgb(0, 200, 255)"
-      blockRect.opacity = 0.75
-      blockRect.noStroke()
+      blockRect.fill = "rgb(0, 100, 150)"
+      blockRect.stroke = "rgb(0, 50, 80)"
+      blockRect.linewidth = 10
 
       block.previousHash.foreach { previousHash =>
-        val message = s"Previous Hash: 0x${previousHash.substring(0, 8)}..."
+        val message = s"Previous Hash: ${previousHash.substring(0, 10)}..."
         val styles = Styles(size = 19, fill = "#FFFFFF", weight = 700)
-        two.makeText(message, xOffset + blockWidth / 2, 25, styles)
+        two.makeText(message, xOffset + blockWidth / 2, 35, styles)
       }
 
       val transactionCount = block.transactions.size
       block.transactions.foreach { transaction =>
         val minX = xOffset + transactionRadius + transactionPadding
         val maxX = xOffset + blockWidth - transactionRadius - transactionPadding
-        val transactionCircle = two.makeCircle(minX, blockWidth / 2, transactionRadius)
+        val minY = yOffset + transactionPadding + transactionRadius + 30
+        val maxY = yOffset + blockWidth - transactionPadding - transactionRadius
 
-        transactionCircle.fill = "#FF8000"
-        transactionCircle.stroke = "orangered"
+        val random = new Random(transaction.nonce)
+        val x = (maxX - minX) * random.nextFloat() + minX
+        val y = (maxY - minY) * random.nextFloat() + minY
+
+        val transactionCircle = two.makeCircle(x, y, transactionRadius)
+
+        val completelySpent =
+          transaction.outputs.forall { output =>
+            blockchain.isConnected(TransactionOutputPair(transaction, output))
+          }
+        if (completelySpent) {
+          transactionCircle.fill = "rgb(200, 0, 0)"
+          transactionCircle.stroke = "rgb(125, 0, 0)"
+        } else {
+          transactionCircle.fill = "rgb(0, 150, 0)"
+          transactionCircle.stroke = "rgb(0, 75, 0)"
+        }
         transactionCircle.linewidth = 5
       }
     }

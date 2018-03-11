@@ -19,12 +19,15 @@ trait BlockchainOps { self: Blockchain =>
 
   def getUnconnectedTransactionOutputs(address: String)
                                       (implicit context: ScalaJsContext): Seq[TransactionOutputPair] =
-    getTransactionOutputs(address).filter { output =>
-      val connectedInputs = findAllConnectedTxInputs(output)
-      if (connectedInputs.size > 1)
-        throw new IllegalStateException("Invalid output - cannot be connected to multiple inputs") //TODO move into validation - double spend
-      connectedInputs.isEmpty
-    }
+    getTransactionOutputs(address).filter(output => !isConnected(output))
+
+  def isConnected(output: TransactionOutputPair)
+                 (implicit context: ScalaJsContext): Boolean = {
+    val connectedInputs = findAllConnectedTxInputs(output)
+    if (connectedInputs.size > 1)
+      throw new IllegalStateException("Invalid output - cannot be connected to multiple inputs") //TODO move into validation - double spend
+    connectedInputs.nonEmpty
+  }
 
   def getUnconnectedOutputs(address: String)
                            (implicit context: ScalaJsContext): Seq[Transaction.Output] =
