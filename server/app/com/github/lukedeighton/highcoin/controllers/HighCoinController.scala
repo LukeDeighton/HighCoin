@@ -24,7 +24,7 @@ class HighCoinController @Inject()(cc: ControllerComponents) extends AbstractCon
   def addTransaction = Action { req: Request[AnyContent] =>
     val jsonBodyStr = req.body.asJson.get.toString()
     val transaction = as[Transaction](jsonBodyStr)
-    Try(transaction.validate()(blockchain, scalaContext)) match {
+    Try(transaction.validate()) match {
       case Success(_) =>
         blockchain = blockchain.addTransaction(transaction)
         Ok(asJson(blockchain))
