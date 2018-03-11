@@ -41,7 +41,7 @@ class ClientController @Inject()(cc: ControllerComponents) extends AbstractContr
     if (sendReq.value > wallet.balance) {
       UnprocessableEntity("Insufficient funds")
     } else {
-      val spendTransaction = wallet.send(sendReq.value, sendReq.recipientAddress)
+      val spendTransaction = wallet.send(sendReq.recipientAddress, sendReq.value)
       blockchain = blockchain.addTransaction(spendTransaction)
       Ok("Transaction will be added to block index: " + blockchain.nextBlockIndex)
     }

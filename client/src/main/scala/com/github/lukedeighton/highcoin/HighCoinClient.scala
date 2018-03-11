@@ -1,6 +1,6 @@
 package com.github.lukedeighton.highcoin
 
-import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Wallet}
+import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Transaction, Wallet}
 import org.scalajs.dom
 import upickle.default.{Reader, Writer, read, write}
 
@@ -16,6 +16,8 @@ class HighCoinClient(host: String) {
   def getBlockchain: Future[Blockchain] = get[Blockchain]("/chain")
 
   def broadcastNextBlock(block: Block): Future[Blockchain] = post[Block, Blockchain]("/block/next", block)
+
+  def sendTransaction(transaction: Transaction): Future[Blockchain] = post[Transaction, Blockchain]("/transaction/new", transaction)
 
   private def get[T : Reader](path: String): Future[T] = makeRequest[Unit, T]("GET", path)
 

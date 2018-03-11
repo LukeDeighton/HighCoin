@@ -23,7 +23,7 @@ case class Wallet(signingKey: Option[String], address: String) {
       .getUnconnectedOutputs(address)
       .price
 
-  def send(value: BigDecimal, recipientAddress: String)
+  def send(recipientAddress: String, value: BigDecimal)
           (implicit blockchain: Blockchain, context: ScalaJsContext): Transaction = {
     val unspentOutputs = getSpendableTransactionOutputs(value)
 

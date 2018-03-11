@@ -9,14 +9,14 @@ trait BlockOps { block: Block =>
   }
 
   private def validatePreviousBlock()(implicit blockchain: Blockchain, context: ScalaJsContext): Unit = {
-    if (blockchain.chain.size > block.height)
+    if (blockchain.blocks.size > block.height)
       throw new IllegalStateException("Block height incorrect")
     block.previousHash match {
       case Some(hash) =>
-        if (blockchain.chain(block.height - 1).hash.hex != hash)
+        if (blockchain.blocks(block.height - 1).hash.hex != hash)
           throw new IllegalStateException("Previous hash doesn't match previous block hash")
       case None =>
-        if (blockchain.chain.nonEmpty)
+        if (blockchain.blocks.nonEmpty)
           throw new IllegalStateException("Excepted previous hash")
     }
   }

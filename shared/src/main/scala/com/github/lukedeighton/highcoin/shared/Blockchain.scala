@@ -1,11 +1,11 @@
 package com.github.lukedeighton.highcoin.shared
 
 //TODO mutable blockchain structure
-case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) extends BlockchainOps {
+case class Blockchain(unboundTransactions: Seq[Transaction], blocks: Seq[Block]) extends BlockchainOps {
 
-  def nextBlockIndex: Int = chain.size
+  def nextBlockIndex: Int = blocks.size
 
-  def lastBlock: Option[Block] = chain.lastOption
+  def lastBlock: Option[Block] = blocks.lastOption
 
   def createBlock(nonce: Int)
                  (implicit context: ScalaJsContext): Block =
@@ -18,13 +18,13 @@ case class Blockchain(unboundTransactions: Seq[Transaction], chain: Seq[Block]) 
 
   def addBlock(block: Block)
               (implicit context: ScalaJsContext): Blockchain =
-    Blockchain(Seq.empty, this.chain :+ block)
+    Blockchain(Seq.empty, this.blocks :+ block)
 
   def addTransaction(transaction: Transaction)
                     (implicit context: ScalaJsContext): Blockchain =
     this.copy(unboundTransactions :+ transaction)
 
-  val allTransactions: Seq[Transaction] = chain.flatMap(_.transactions)
+  val allTransactions: Seq[Transaction] = blocks.flatMap(_.transactions)
 
   val allTransactionOutputs: Seq[Transaction.Output] = allTransactions.flatMap(_.outputs)
 
@@ -36,5 +36,5 @@ object Blockchain {
   val empty =
     Blockchain(
       unboundTransactions = Seq.empty,
-      chain = Seq.empty)
+      blocks = Seq.empty)
 }

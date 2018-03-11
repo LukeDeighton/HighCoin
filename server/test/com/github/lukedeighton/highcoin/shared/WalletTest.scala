@@ -25,7 +25,7 @@ class WalletTest extends FlatSpec with Matchers with OptionValues {
     walletB.balance shouldBe 0
     walletC.balance shouldBe 0
 
-    var spendTransaction = walletA.send(25, recipientAddress = "C")
+    var spendTransaction = walletA.send(recipientAddress = "C", 25)
     blockchain = blockchain.addTransaction(spendTransaction)
 
     nextBlock = mineNextBlock(rewardAddress = "A").value
@@ -42,7 +42,7 @@ class WalletTest extends FlatSpec with Matchers with OptionValues {
     walletB.balance shouldBe 0
     walletC.balance shouldBe 25
 
-    spendTransaction = walletA.send(15, recipientAddress = "B")
+    spendTransaction = walletA.send(recipientAddress = "B", 15)
     blockchain = blockchain.addTransaction(spendTransaction)
 
     nextBlock = mineNextBlock(rewardAddress = "C").value
@@ -52,7 +52,7 @@ class WalletTest extends FlatSpec with Matchers with OptionValues {
     walletB.balance shouldBe 15
     walletC.balance shouldBe 50
 
-    spendTransaction = walletA.send(34, recipientAddress = "B")
+    spendTransaction = walletA.send(recipientAddress = "B", 34)
     blockchain = blockchain.addTransaction(spendTransaction)
 
     nextBlock = mineNextBlock(rewardAddress = "C").value
@@ -62,7 +62,7 @@ class WalletTest extends FlatSpec with Matchers with OptionValues {
     walletB.balance shouldBe 49
     walletC.balance shouldBe 75
 
-    spendTransaction = walletB.send(49, recipientAddress = "A")
+    spendTransaction = walletB.send(recipientAddress = "A", 49)
     blockchain = blockchain.addTransaction(spendTransaction)
 
     nextBlock = mineNextBlock(rewardAddress = "C").value
