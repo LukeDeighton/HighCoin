@@ -3,51 +3,50 @@ package com.github.lukedeighton.highcoin
 import java.util.Date
 
 import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Transaction, Wallet}
-import upickle.default.{ReadWriter => RW, Writer, Reader}
-import upickle.{Js, default}
 
-object UPickleJsonSerialisers {
+object UPickleJsonSerialisers extends upickle.AttributeTagged {
 
-  implicit def optionRW[T : RW]: RW[Option[T]] = RW({
-    case Some(value) => implicitly[Writer[T]].write(value)
-    case None        => Js.Null
-  }, {
-    case Js.Null => None
-    case jsValue => Some(implicitly[Reader[T]].read(jsValue))
-  })
+  override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
+    implicitly[Writer[T]].comap[Option[T]] {
+      case None => null.asInstanceOf[T]
+      case Some(x) => x
+    }
 
-  implicit def dateRW: RW[Date] = RW(date => Js.Str(date.toString), {
-    case jsDate => new Date(jsDate.str.toString)
-  })
-
-  implicit def bigDecimalRW: RW[BigDecimal] = RW(value => Js.Num(value.doubleValue()), {
-    case Js.Str(value) => BigDecimal(value.toString)
-    case Js.Num(value) => BigDecimal(value)
-  })
-
-  implicit def walletRW: RW[Wallet] = default.macroRW
-
-  implicit def transactionOutputRW: RW[Transaction.Output] = default.macroRW
-
-  implicit def transactionOutputRefRW: RW[Transaction.OutputRef] = default.macroRW
-
-  implicit def transactionInputRW: RW[Transaction.Input] = default.macroRW
-
-  implicit def transactionRW: RW[Transaction] = default.macroRW
-
-  implicit def blockRW: RW[Block] = RW(default.macroW[Block].write, readBlock)
-
-  def readBlock: PartialFunction[Js.Value, Block] = { //Reading Options is broken
-    case blockObj: Js.Obj =>
-      val block = blockObj.value.toMap
-      val height = block("height").num.asInstanceOf[Int]
-      val nonce = block("nonce").num.asInstanceOf[Int]
-      val transactions = block("transactions").arr.map(transactionRW.read)
-      val previousHash = block.get("previousHash").map(_.str.toString)
-      val timestamp = dateRW.read(block("timestamp"))
-      Block(height, nonce, transactions, previousHash, timestamp)
+  override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
+    new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))){
+      override def visitNull(index: Int) = None
+    }
   }
 
-  implicit def blockchainRW: RW[Blockchain] = default.macroRW
+  implicit def dateRW: ReadWriter[Date] = readwriter[ujson.Value]
+    .bimap(date => ujson.Str(date.toString), jsDate => new Date(jsDate.str))
 
+  implicit def bigDecimalRW: ReadWriter[BigDecimal] = readwriter[ujson.Value].bimap(value => ujson.Num(value.doubleValue()), {
+    case ujson.Str(value) => BigDecimal(value)
+    case ujson.Num(value) => BigDecimal(value)
+  })
+
+  implicit def walletRW: ReadWriter[Wallet] = macroRW
+
+  implicit def transactionOutputRW: ReadWriter[Transaction.Output] = macroRW
+
+  implicit def transactionOutputRefRW: ReadWriter[Transaction.OutputRef] = macroRW
+
+  implicit def transactionInputRW: ReadWriter[Transaction.Input] = macroRW
+
+  implicit def transactionRW: ReadWriter[Transaction] = macroRW
+
+  implicit def blockRW: ReadWriter[Block] = ReadWriter.join(blockR, macroW[Block])
+
+  implicit def blockR: Reader[Block] = reader[ujson.Value].map { case blockObj: ujson.Obj =>
+    val block = blockObj.value.toMap
+    val height = block("height").num.asInstanceOf[Int]
+    val nonce = block("nonce").num.asInstanceOf[Int]
+    val transactions = block("transactions").arr.map(ujson.transform(_, transactionRW))
+    val previousHash = block.get("previousHash").map(_.str)
+    val timestamp = ujson.transform(block("timestamp"), dateRW)
+    Block(height, nonce, transactions, previousHash, timestamp)
+  }
+
+  implicit def blockchainRW: ReadWriter[Blockchain] = macroRW
 }

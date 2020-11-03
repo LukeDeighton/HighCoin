@@ -21,8 +21,8 @@ class Two(params: Params) extends js.Object {
 }
 
 trait Params extends js.Object {
-  var width: Int = js.native
-  var height: Int = js.native
+  var width: Int
+  var height: Int
 }
 
 object Params {
@@ -32,22 +32,23 @@ object Params {
 }
 
 @js.native
+@JSGlobal
 class Circle(x: Double, y: Double, radius: Double) extends js.Object {
-
   var fill: String = js.native
   var stroke: String = js.native
   var linewidth: Double = js.native
 }
 
 @js.native
+@JSGlobal
 class Rectangle(x: Double, y: Double, width: Double, height: Double) extends js.Object {
-
   var fill: String = js.native
   var stroke: String = js.native
   var linewidth: Double = js.native
 }
 
 @js.native
+@JSGlobal
 class Text(message: String, x: Double, y: Double, styles: Styles) extends js.Object
 
 trait Styles extends js.Object {

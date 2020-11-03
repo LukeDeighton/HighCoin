@@ -2,7 +2,6 @@ package com.github.lukedeighton.highcoin
 
 import com.github.lukedeighton.highcoin.shared.{Block, Blockchain, Transaction, Wallet}
 import org.scalajs.dom
-import upickle.default.{Reader, Writer, read, write}
 
 import scala.concurrent.Future
 import scala.scalajs.js
